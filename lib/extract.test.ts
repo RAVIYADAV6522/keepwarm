@@ -90,6 +90,11 @@ describe("rule-based extractor on webhook text", () => {
     expect(r.problem).toBe("Walk in freezer not freezing, food is thawing");
   });
 
+  it("keeps the lowercase s after an apostrophe in business names", () => {
+    const r = extractWithRules("Tony from Tony's Diner, ice machine is leaking again. 312-555-0142", "notebook");
+    expect(r).toMatchObject({ business_name: "Tony's Diner", phone: "+13125550142", equipment: "ice_machine" });
+  });
+
   it("reads a voicemail transcript", () => {
     const r = extractWithRules("Missed call from (708) 555-0188. Voicemail:\nHi, this is Mark with Northgate Warehouse. One of our walk-in coolers is alarming at 48 degrees.", "call");
     expect(r.phone).toBe("+17085550188");

@@ -12,6 +12,19 @@ Job requests arrive by phone, text, email, website form and a paper notebook. Ke
 |---|---|---|
 | ![All jobs board](docs/screenshots/jobs.png) | ![Numbers](docs/screenshots/numbers.png) | ![Today on a phone](docs/screenshots/today-mobile.png) |
 
+### Try it in 2 minutes
+
+1. **Today.** Tony's Diner (freezer down) is at the top. Every card says why it is on the list.
+2. **A reply to a quote.** Open **Simulate leads** and press *Simulate customer text*. FreshMart accepts their $1,250 quote; the message is added to their existing job (no duplicate) and it moves up on Today as "They messaged just now".
+3. **New leads and spam.** Press *Simulate email* twice. The hotel's request becomes a new job; the SEO pitch is filtered out.
+4. **Logging a call.** On Green Leaf Bistro, tap **···** → *Log contact* → *Left voicemail*. The card leaves today's list and comes back tomorrow morning.
+5. **Quick add.** Tap **+ New job**, paste `Tony from Tony's Diner, ice machine is leaking again. 312-555-0142` and press *Organize it*. The fields are filled in and Tony is recognised as a repeat customer.
+6. **Numbers.** Open jobs, money waiting on a yes, and where leads come from.
+
+*Reset demo data* on the Simulate leads page restores the starting state.
+
+For the reasoning behind the product (the problem, key decisions, assumptions, rollout and success measures), see the **[design notes](docs/DECISIONS.md)**.
+
 ---
 
 ## Features

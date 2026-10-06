@@ -59,7 +59,7 @@ export function guessUrgency(text: string): Urgency {
 }
 
 function titleCase(s: string) {
-  return s.replace(/\b([a-z])/g, (c) => c.toUpperCase());
+  return s.replace(/(^|[\s-])([a-z])/g, (_, sep, c) => sep + c.toUpperCase()); // not after an apostrophe: "Tony's"
 }
 
 // "its marco from luigis" / "This is Tony at Tony's Diner" / "Sam (Corner Deli)"
