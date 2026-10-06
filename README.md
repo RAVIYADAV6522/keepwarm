@@ -21,7 +21,8 @@ Job requests arrive by phone, text, email, website form and a paper notebook. Ke
 5. **Quick add.** Tap **+ New job**, paste `Tony from Tony's Diner, ice machine is leaking again. 312-555-0142` and press *Organize it*. The fields are filled in and Tony is recognised as a repeat customer.
 6. **Ready-to-send text.** Open FreshMart Grocery. The text under the Call and Text buttons is the follow-up on their $1,250 quote, already written.
 7. **Snooze.** On Luigi's Pizzeria, tap **···** → *Remind me later* → *Monday*. It moves to the Snoozed list at the bottom of Today.
-8. **Numbers and sharing.** Open jobs, money waiting on a yes, and where leads come from. Press *Create a read-only link* and open it in a private window: the numbers, without the passcode or any way to change anything.
+8. **Customer profile.** Tap *Tony's Diner* on any of its jobs: four jobs, $1,110 earned, and a pinned note with the door code.
+9. **Numbers and sharing.** Open jobs, money waiting on a yes, and where leads come from. Press *Create a read-only link* and open it in a private window: the numbers, without the passcode or any way to change anything.
 
 *Reset demo data* on the Simulate leads page restores the starting state.
 
@@ -41,6 +42,7 @@ For the reasoning behind the product (the problem, key decisions, assumptions, r
 - **Quick add.** Paste a text or email, or dictate with the keyboard mic. The message is turned into structured fields, shown for review, and saved. Repeat customers are recognised by phone number.
 - **Emergency alerts and a morning email.** "Freezer down" requests send an alert immediately. A daily email repeats the Today list.
 - **Numbers.** Open jobs, new this week, dollars waiting on a yes, won and lost this month (with the reasons jobs were lost), and new leads per week by source.
+- **Customer profiles.** Every customer's jobs, money earned, win rate and a pinned note ("alley door, code 4412") that shows on each of their jobs. The Customers list puts the biggest customers first.
 - **Share and export.** A read-only Numbers link for a partner or bookkeeper (no passcode, revocable at any time), and CSV downloads of every job and customer.
 - **Mobile-first.** Bottom tab bar and large tap targets on phones; sidebar and column board on desktop; light and dark mode.
 
@@ -145,16 +147,19 @@ All optional; see [`.env.example`](.env.example).
 | `lib/intake.test.ts` | New leads, repeat-customer messages, emergencies, spam, missed calls |
 | `lib/extract.test.ts` | Extraction from a messy SMS, a forwarded form email, a notebook note and spam (also against Claude when a key is set) |
 | `lib/messages.test.ts` | Ready-to-send texts for each stage |
+| `lib/customers.test.ts` | Customer roll-ups (earned, win rate, latest job) and ranking |
 | `lib/share.test.ts`, `lib/csv.test.ts` | Share links (create, replace, revoke) and safe CSV output |
 | `lib/phone.test.ts`, `lib/numbers.test.ts` | Phone normalization and reporting |
 
 ### Project layout
 
 ```
-app/(app)/          Today, All jobs, Job detail, Add job, Numbers, Simulate leads, Morning email (signed in)
+app/(app)/          Today, All jobs, Job detail, Add job, Customers, Numbers, Simulate leads, Morning email (signed in)
+app/share/[token]   Read-only Numbers link
 app/contact         Public sample contact form
 app/api/inbound/*   Intake webhooks
 app/api/extract     Text → fields for quick add
+app/api/export      CSV downloads
 app/api/cron/digest Daily morning email
 app/actions.ts      Server actions (thin wrappers around lib/)
 lib/today.ts        Today ranking
@@ -180,5 +185,4 @@ Deliberately not included in this version:
 ## Roadmap
 
 - A Twilio number that forwards to the owner's cell, so missed calls, voicemails and texts become leads automatically (the webhooks are ready).
-- "Snooze until…" quick actions on Today cards.
 - A weekly summary email for a partner or bookkeeper.

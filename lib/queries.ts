@@ -5,6 +5,7 @@ import { getDb } from "@/db";
 import { activities, customers, jobs, type Customer, type Job } from "@/db/schema";
 import { config } from "./config";
 import { buildDigest } from "./digest";
+import { rankCustomers, summarizeCustomer } from "./customers";
 import { countCalls, getTodayList, isSnoozed } from "./today";
 
 export type JobWithCustomer = Job & { customer: Customer };
@@ -60,6 +61,23 @@ export async function getJob(id: number) {
       .orderBy(desc(jobs.createdAt)),
   ]);
   return { job: { ...row.jobs, customer: row.customers }, activities: log, otherJobs: past };
+}
+
+export async function getCustomers() {
+  const d = await db();
+  const [all, rows] = await Promise.all([
+    d.select().from(customers),
+    d.select({ customerId: jobs.customerId, stage: jobs.stage, quoteAmount: jobs.quoteAmount, createdAt: jobs.createdAt, equipment: jobs.equipment }).from(jobs),
+  ]);
+  return rankCustomers(all.map((c) => summarizeCustomer(c, rows.filter((j) => j.customerId === c.id))));
+}
+
+export async function getCustomer(id: number) {
+  const d = await db();
+  const [customer] = await d.select().from(customers).where(eq(customers.id, id));
+  if (!customer) return null;
+  const list = await d.select().from(jobs).where(eq(jobs.customerId, id)).orderBy(desc(jobs.createdAt));
+  return { customer, jobs: list, summary: summarizeCustomer(customer, list) };
 }
 
 // Used by the "Repeat customer found" banner on Add job.

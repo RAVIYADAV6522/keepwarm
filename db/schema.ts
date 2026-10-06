@@ -20,6 +20,8 @@ export const customers = pgTable("customers", {
   phone: text("phone").unique(), // E.164; null when we only have an email
   email: text("email"),
   address: text("address"),
+  // Pinned note: "Back door code 4412, ask for Tony".
+  notes: text("notes"),
   createdAt: ts("created_at").notNull().defaultNow(),
 });
 

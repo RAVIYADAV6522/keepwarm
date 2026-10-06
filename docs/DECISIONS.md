@@ -27,6 +27,7 @@ The first customer runs a commercial refrigeration repair company (walk-in coole
 | "Call me next week" requests that would otherwise nag daily | Snooze until a chosen day; a message from the customer ends it early |
 | Following up takes time she does not have | Ready-to-send texts for each stage, sent from her own phone |
 | Requests arrive in five places | One intake pipeline behind the web form, email, SMS and missed-call webhooks, plus quick add |
+| She thinks in customers, not jobs | Customer profiles with history, money earned and a pinned note shown on every job |
 | Many requests are repeat customers | Customers matched by phone number; replies attach to the open job instead of duplicating it |
 | The lost Friday freezer job | Emergency alert the moment a "freezer down" request arrives |
 | "If I had that list every morning" | Daily morning email with the same list |

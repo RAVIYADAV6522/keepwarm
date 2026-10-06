@@ -42,10 +42,21 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
           <span>{STAGE_LABEL[job.stage]}</span>
           {job.autoAdded && <span>· added automatically</span>}
         </div>
-        <h1 className="font-serif text-[clamp(30px,3.6vw,38px)] leading-[1.1]">{card.name}</h1>
+        <h1 className="font-serif text-[clamp(30px,3.6vw,38px)] leading-[1.1]">
+          <Link href={`/customers/${job.customer.id}`} className="hover:text-clay-ink">
+            {card.name}
+          </Link>
+        </h1>
         <div className="text-base text-ink2">{[card.contact, card.phoneDisplay, job.customer.email].filter(Boolean).join(" · ")}</div>
         {job.customer.address && <div className="text-[15px] text-ink2">{job.customer.address}</div>}
       </div>
+
+      {job.customer.notes && (
+        <Link href={`/customers/${job.customer.id}`} className="rounded-[14px] bg-amber-s px-4 py-3 text-[15px] leading-snug text-ink">
+          <span className="field-label mb-0.5 block text-amber">Customer note</span>
+          {job.customer.notes}
+        </Link>
+      )}
 
       <div className="card flex flex-col gap-1 p-4">
         <span className="field-label">The job</span>
@@ -124,7 +135,12 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
 
       {otherJobs.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="font-serif text-[22px]">Other jobs for {card.name}</h2>
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="font-serif text-[22px]">Other jobs for {card.name}</h2>
+            <Link href={`/customers/${job.customer.id}`} className="text-sm font-semibold text-clay-ink">
+              Customer profile ›
+            </Link>
+          </div>
           <div className="card divide-y divide-line">
             {otherJobs.map((o) => (
               <Link key={o.id} href={`/jobs/${o.id}`} className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted">

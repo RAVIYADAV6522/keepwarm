@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/login/actions";
 
-const isActive = (path: string, href: string) => (href === "/" ? path === "/" : path === href || (href === "/jobs" && /^\/jobs\/\d+/.test(path)));
+const isActive = (path: string, href: string) =>
+  href === "/" ? path === "/" : path === href || (href === "/jobs" && /^\/jobs\/\d+/.test(path)) || (href === "/customers" && path.startsWith("/customers/"));
 
 type Account = { owner: string; business: string; canLogout: boolean };
 
@@ -13,6 +14,7 @@ export function Sidebar({ todayCount, openCount, account }: { todayCount: number
   const items = [
     { href: "/", label: "Today", count: todayCount },
     { href: "/jobs", label: "All jobs", count: openCount },
+    { href: "/customers", label: "Customers", count: null },
     { href: "/numbers", label: "Numbers", count: null },
   ];
   return (
@@ -97,9 +99,9 @@ export function MobileFooter({ account }: { account: Account }) {
   const row = "flex h-[52px] w-full items-center gap-3 px-4 text-[15px] text-ink";
   return (
     <div className="mt-12 flex flex-col gap-2.5 lg:hidden">
-      <div className="px-1 text-[11.5px] font-semibold tracking-[0.06em] text-ink2 uppercase">Tools</div>
+      <div className="px-1 text-[11.5px] font-semibold tracking-[0.06em] text-ink2 uppercase">More</div>
       <div className="card divide-y divide-line overflow-hidden">
-        {TOOLS.map((t) => (
+        {[{ href: "/customers", label: "Customers", Icon: PeopleIcon }, ...TOOLS].map((t) => (
           <Link key={t.href} href={t.href} className={row}>
             <span className="text-ink2"><t.Icon /></span>
             <span className="flex-1">{t.label}</span>
@@ -144,6 +146,16 @@ function BoltIcon() {
   return (
     <svg {...iconProps}>
       <path d="M13 3 5 13.5h6L10 21l8-10.5h-6L13 3Z" />
+    </svg>
+  );
+}
+
+function PeopleIcon() {
+  return (
+    <svg {...iconProps}>
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5" />
+      <path d="M15.5 5.2a3 3 0 0 1 0 5.6M17.5 14.4c1.6.6 2.7 2.2 3 4.6" />
     </svg>
   );
 }

@@ -15,6 +15,7 @@ import { matchCustomer } from "@/lib/match";
 import { sendEmergencyAlert } from "@/lib/notify";
 import { seed } from "@/lib/seed";
 import { createShare, revokeShare } from "@/lib/share";
+import { setCustomerNote } from "@/lib/customers";
 import { dollarsToCents } from "@/lib/format";
 import { formatDate, fromDateInput } from "@/lib/time";
 
@@ -60,6 +61,11 @@ export async function snoozeAction(jobId: number, choice: SnoozeOption | { date:
 
 export async function wakeAction(jobId: number) {
   await wake(await getDb(), jobId);
+  refresh();
+}
+
+export async function setCustomerNoteAction(customerId: number, note: string) {
+  await setCustomerNote(await getDb(), customerId, note.slice(0, 2000));
   refresh();
 }
 

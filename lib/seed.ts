@@ -11,7 +11,7 @@ const MIN = 60_000;
 const HOUR = 60 * MIN;
 const DAY = 24 * HOUR;
 
-type SeedCustomer = { name: string; business: string; phone: string; email?: string; address: string };
+type SeedCustomer = { name: string; business: string; phone: string; email?: string; address: string; notes?: string };
 type SeedJob = {
   problem: string;
   equipment: Equipment;
@@ -43,7 +43,7 @@ function nextWeekday(now: Date, weekday: number, hour: number): Date {
 function data(now: Date): { customer: SeedCustomer; jobs: SeedJob[] }[] {
   return [
     {
-      customer: { name: "Tony Russo", business: "Tony's Diner", phone: "+13125550142", address: "212 W 4th St" },
+      customer: { name: "Tony Russo", business: "Tony's Diner", phone: "+13125550142", address: "212 W 4th St", notes: "Use the alley door, code 4412. Ask for Tony, not the night manager." },
       jobs: [
         {
           problem: "Walk-in freezer down, product at risk",
@@ -92,7 +92,7 @@ function data(now: Date): { customer: SeedCustomer; jobs: SeedJob[] }[] {
       ],
     },
     {
-      customer: { name: "Rita Okafor", business: "Harbor Seafood Co", phone: "+13125550190", email: "rita@harborseafood.co", address: "Pier 45, 600 E Grand Ave" },
+      customer: { name: "Rita Okafor", business: "Harbor Seafood Co", phone: "+13125550190", email: "rita@harborseafood.co", address: "Pier 45, 600 E Grand Ave", notes: "Quotes need sign-off from the owner, who is only in on Thursdays." },
       jobs: [
         {
           problem: "Compressor replacement on main walk-in",
@@ -232,6 +232,7 @@ export async function seed(db: Db, now = new Date()) {
         phone: customer.phone,
         email: customer.email ?? null,
         address: customer.address || null,
+        notes: customer.notes ?? null,
         createdAt: at(Math.max(...list.map((j) => j.createdAgo)))!,
       })
       .returning();
