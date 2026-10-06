@@ -1,6 +1,9 @@
+import { notFound } from "next/navigation";
 import { DemoPanel } from "@/components/DemoPanel";
+import { DEMO_MODE } from "@/lib/config";
 
 export default function DemoPage() {
+  if (!DEMO_MODE) notFound();
   return (
     <div className="flex max-w-[760px] flex-col gap-6">
       <div className="flex flex-col gap-2">

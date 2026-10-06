@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { moveStageAction } from "@/app/actions";
-import { SOURCE_LABEL, TONE_CHIP, type Tone } from "@/lib/format";
+import { TONE_CHIP, type Tone } from "@/lib/format";
 import { smsHref } from "@/lib/messages";
 import type { CardJob } from "@/lib/view";
 import { LogSheet } from "./LogSheet";
@@ -36,9 +36,6 @@ export function TodayCard({ job, reason, tone, suggestLost, attempts }: Props) {
           <div className="flex min-w-0 flex-col gap-0.5">
             <div className="text-[17px] font-semibold tracking-[-0.01em]">{job.name}</div>
             <div className="text-sm text-ink2">{[job.contact, job.phoneDisplay].filter(Boolean).join(" · ")}</div>
-          </div>
-          <div className="flex-none rounded-md border border-line px-[7px] py-[3px] text-[11px] font-medium tracking-[0.04em] text-ink2 uppercase">
-            {SOURCE_LABEL[job.source]}
           </div>
         </div>
         <div className="text-[15px] leading-snug text-pretty">{job.problem}</div>

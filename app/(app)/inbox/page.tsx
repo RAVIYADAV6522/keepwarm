@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getDb } from "@/db";
 import { CheckNowButton, DisconnectButton, DismissButton, SampleEmailsButton } from "@/components/InboxControls";
-import { config } from "@/lib/config";
+import { config, DEMO_MODE } from "@/lib/config";
 import type { ExtractResult } from "@/lib/extract";
 import { TONE_CHIP, URGENCY_LABEL } from "@/lib/format";
 import { gmailConfigured } from "@/lib/gmail";
@@ -89,7 +89,7 @@ export default async function InboxPage({ searchParams }: PageProps<"/inbox">) {
             <p className="max-w-[380px] text-[15px] text-ink2">
               New enquiries land here automatically. Emergencies skip the queue and go straight onto Today.
             </p>
-            <SampleEmailsButton />
+            {DEMO_MODE && <SampleEmailsButton />}
           </div>
         )}
 
@@ -125,7 +125,7 @@ export default async function InboxPage({ searchParams }: PageProps<"/inbox">) {
             </div>
           );
         })}
-        {pending.length > 0 && !account && (
+        {pending.length > 0 && !account && DEMO_MODE && (
           <div className="flex justify-center">
             <SampleEmailsButton />
           </div>

@@ -8,5 +8,8 @@ export const config = {
 
 export type TodayConfig = typeof config;
 
+// Demo tools (Simulate leads, Reset, sample emails) appear only on the public demo and in local development.
+export const DEMO_MODE = process.env.NODE_ENV !== "production" || process.env.DEMO_MODE === "true" || process.env.SHOW_PASSCODE === "true";
+
 export const OWNER_NAME = process.env.OWNER_NAME || "Denise";
 export const BUSINESS_NAME = process.env.BUSINESS_NAME || "Denise's Refrigeration";

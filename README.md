@@ -4,7 +4,7 @@
 
 Job requests arrive by phone, text, email, website form and a paper notebook. KeepWarm puts them all in one list, tracks where each job stands, and shows the owner one thing each morning: **who to call today**. A job stays on that list until it is done or lost, so no request goes cold because it was forgotten. Connect Gmail and enquiries from the owner's inbox arrive on their own, already filled in.
 
-**Live demo:** [keepwarm.vercel.app](https://keepwarm.vercel.app) (the passcode is filled in on the sign-in page). Use **Simulate leads** in the sidebar to send in a web form, email, customer text or missed call, or **Inbox → Load sample emails** to try the email review flow.
+**Live demo:** [keepwarm.vercel.app](https://keepwarm.vercel.app) (the passcode is filled in on the sign-in page). Use **Simulate leads** in the sidebar (demo mode only) to send in a web form, email, customer text or missed call, or **Inbox → Load sample emails** to try the email review flow.
 
 ![Today screen](docs/screenshots/today.png)
 
@@ -38,7 +38,7 @@ For the reasoning behind the product (the problem, key decisions, assumptions, r
 ## Features
 
 - **Today.** One ranked list of who to call. Every card says why it is there ("No reply in 3 days", "Emergency · by call 40 min ago") and has one-tap **Call** and **Text** buttons that open the phone's own apps.
-- **Today's progress.** A progress bar on Today ("3 handled · 6 to go") fills as calls, texts and quotes are logged, so clearing the list each morning feels finished.
+- **Today's progress.** A slim bar under the day's summary ("3 of 12 done") fills as calls, texts and quotes are logged, so clearing the list each morning feels finished.
 - **Follow-up rules.** Any open job with no contact for 2 days comes back on its own. Quotes with no answer after 2 days are sorted by dollar amount. After 3 unanswered attempts the card suggests **Mark as lost?**, but nothing is ever closed automatically.
 - **Snooze.** "Call me next week" leads can be set aside until tomorrow, Monday, a week out or any date. They leave Today, sit in a Snoozed list, and come back at 9am on the day, or immediately if the customer gets in touch first.
 - **Simple stages.** New → Waiting on quote → Waiting on their yes → Said yes → Scheduled → Done (or Lost). One tap to move a job, with a full activity history.
@@ -134,7 +134,8 @@ All optional; see [`.env.example`](.env.example).
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | Claude extraction (default `claude-haiku-4-5`) instead of rules |
 | `RESEND_API_KEY`, `ALERT_EMAIL_TO`, `ALERT_EMAIL_FROM`, `APP_URL` | Send emergency alerts and the morning email (otherwise logged to the console) |
 | `APP_PASSCODE` | Require a shared passcode (httpOnly cookie, 90 days) |
-| `SHOW_PASSCODE` | `true` pre-fills the passcode on the sign-in page (public demos only) |
+| `SHOW_PASSCODE` | `true` pre-fills the passcode on the sign-in page and turns on the demo tools (public demos only) |
+| `DEMO_MODE` | `true` shows the demo tools (Simulate leads, Reset, sample emails) without pre-filling the passcode. They're always on in local development and off for a real customer |
 | `INBOUND_TOKEN` | Required `?token=` on the email, SMS and call webhooks |
 | `CRON_SECRET` | Protects `/api/cron/digest` (sent automatically by Vercel Cron) |
 | `BUSINESS_TZ`, `OWNER_NAME`, `BUSINESS_NAME` | Localize to the business |

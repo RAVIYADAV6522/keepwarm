@@ -7,7 +7,7 @@ import { logout } from "@/app/login/actions";
 const isActive = (path: string, href: string) =>
   href === "/" ? path === "/" : path === href || (href === "/jobs" && /^\/jobs\/\d+/.test(path)) || (href === "/customers" && path.startsWith("/customers/"));
 
-type Account = { owner: string; business: string; canLogout: boolean };
+type Account = { owner: string; business: string; canLogout: boolean; demo: boolean };
 
 export function Sidebar({ todayCount, openCount, inboxCount, account }: { todayCount: number; openCount: number; inboxCount: number; account: Account }) {
   const path = usePathname();
@@ -52,7 +52,7 @@ export function Sidebar({ todayCount, openCount, inboxCount, account }: { todayC
         </Link>
         <div className="mt-auto flex flex-col gap-1">
           <div className="px-3.5 pb-1 text-[11px] font-semibold tracking-[0.08em] text-side-ink2 uppercase">Tools</div>
-          {TOOLS.map((t) => {
+          {tools(account.demo).map((t) => {
             const on = path === t.href;
             return (
               <Link
@@ -78,6 +78,8 @@ const TOOLS = [
   { href: "/digest", label: "Morning email", Icon: MailIcon },
   { href: "/demo", label: "Simulate leads", Icon: BoltIcon },
 ];
+// "Simulate leads" is a demo tool: a real business never sees it.
+const tools = (demo: boolean) => TOOLS.filter((t) => demo || t.href !== "/demo");
 
 function AccountRow({ account }: { account: Account }) {
   return (
@@ -112,7 +114,7 @@ export function MobileFooter({ account, inboxCount }: { account: Account; inboxC
     <div className="mt-12 flex flex-col gap-2.5 lg:hidden">
       <div className="px-1 text-[11.5px] font-semibold tracking-[0.06em] text-ink2 uppercase">More</div>
       <div className="card divide-y divide-line overflow-hidden">
-        {[{ href: "/inbox", label: "Inbox", Icon: InboxIcon, count: inboxCount }, { href: "/customers", label: "Customers", Icon: PeopleIcon, count: 0 }, ...TOOLS.map((t) => ({ ...t, count: 0 }))].map((t) => (
+        {[{ href: "/inbox", label: "Inbox", Icon: InboxIcon, count: inboxCount }, { href: "/customers", label: "Customers", Icon: PeopleIcon, count: 0 }, ...tools(account.demo).map((t) => ({ ...t, count: 0 }))].map((t) => (
           <Link key={t.href} href={t.href} className={row}>
             <span className="text-ink2"><t.Icon /></span>
             <span className="flex-1">{t.label}</span>

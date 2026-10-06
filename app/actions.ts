@@ -6,7 +6,7 @@ import { z } from "zod";
 import { getDb } from "@/db";
 import { jobs } from "@/db/schema";
 import { EQUIPMENT, LOG_KINDS, SNOOZE_OPTIONS, SOURCES, STAGES, URGENCY, type LogKind, type SnoozeOption, type Stage, type Urgency } from "@/lib/constants";
-import { config } from "@/lib/config";
+import { config, DEMO_MODE } from "@/lib/config";
 import { attachMessage, createJob } from "@/lib/intake";
 import { addNote, logContact, moveStage, snooze, snoozeTarget, updateJob, wake } from "@/lib/jobs";
 import { DEMO_SAMPLES, SAMPLE_EMAILS, type DemoKind } from "@/lib/demo-samples";
@@ -119,6 +119,7 @@ export async function dismissInboxAction(id: number) {
 // Demo: run four realistic emails through the same pipeline a real Gmail message goes through.
 export async function loadSampleEmailsAction() {
   await requireAuth();
+  if (!DEMO_MODE) throw new Error("Demo tools are turned off");
   const db = await getDb();
   const stamp = Date.now();
   const outcomes = [];
@@ -212,6 +213,7 @@ export async function saveJobAction(input: z.input<typeof JobInputSchema>, raw: 
 // Called in-process (not over HTTP), so the inbound token never leaves the server.
 export async function simulateAction(kind: DemoKind, index: number) {
   await requireAuth();
+  if (!DEMO_MODE) throw new Error("Demo tools are turned off");
   const samples = DEMO_SAMPLES[kind];
   const payload = samples[index % samples.length];
   const token = process.env.INBOUND_TOKEN ? `?token=${encodeURIComponent(process.env.INBOUND_TOKEN)}` : "";
@@ -227,6 +229,7 @@ export async function simulateAction(kind: DemoKind, index: number) {
 
 export async function resetDemoAction() {
   await requireAuth();
+  if (!DEMO_MODE) throw new Error("Demo tools are turned off");
   await seed(await getDb());
   refresh();
 }

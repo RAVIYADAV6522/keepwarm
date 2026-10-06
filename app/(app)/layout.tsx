@@ -1,7 +1,7 @@
 import { BottomBar, MobileFooter, Sidebar } from "@/components/Nav";
 import { getDb } from "@/db";
 import { MailSync } from "@/components/InboxControls";
-import { BUSINESS_NAME, OWNER_NAME } from "@/lib/config";
+import { BUSINESS_NAME, DEMO_MODE, OWNER_NAME } from "@/lib/config";
 import { getAccount, pendingCount } from "@/lib/mailbox";
 import { getOpenJobs, getToday } from "@/lib/queries";
 
@@ -9,7 +9,7 @@ import { getOpenJobs, getToday } from "@/lib/queries";
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const db = await getDb();
   const [today, open, inbox, gmail] = await Promise.all([getToday(), getOpenJobs(), pendingCount(db), getAccount(db)]);
-  const account = { owner: OWNER_NAME, business: BUSINESS_NAME, canLogout: Boolean(process.env.APP_PASSCODE) };
+  const account = { owner: OWNER_NAME, business: BUSINESS_NAME, canLogout: Boolean(process.env.APP_PASSCODE), demo: DEMO_MODE };
   return (
     <>
       <div className="flex min-h-dvh">

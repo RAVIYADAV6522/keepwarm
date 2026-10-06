@@ -30,7 +30,20 @@ export default async function TodayPage({ searchParams }: PageProps<"/">) {
           <div className="text-[15px] text-ink2">{date}</div>
           <h1 className="font-serif text-[clamp(32px,4vw,44px)] leading-[1.08] tracking-[-0.01em]">{greeting}</h1>
         </div>
-        {summary && <div className="rounded-full bg-clay px-[15px] py-[9px] text-[15px] font-semibold text-clay-ink">{summary}</div>}
+        {(summary || handled > 0) && (
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-[300px]">
+            {summary && <div className="w-fit rounded-full bg-clay px-[15px] py-[9px] text-[15px] font-semibold text-clay-ink sm:self-end">{summary}</div>}
+            {/* Today's progress: fills as she logs calls, texts and quotes. */}
+            <div className="flex items-center gap-2.5 px-1">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Today's progress">
+                <div className="h-full rounded-full bg-gradient-to-r from-[var(--accent-top)] to-accent transition-[width] duration-500" style={{ width: `${Math.max(progress, handled ? 4 : 0)}%` }} />
+              </div>
+              <span className="flex-none text-[13px] text-ink2">
+                <span className="font-semibold text-ink tabular-nums">{handled}</span> of {handled + toGo} done
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {from === "contact" && (
@@ -49,21 +62,6 @@ export default async function TodayPage({ searchParams }: PageProps<"/">) {
           </span>
           <span className="text-sm font-semibold text-clay-ink">Review ›</span>
         </Link>
-      )}
-
-      {handled + toGo > 0 && (
-        <div className="card flex flex-col gap-3 px-4 py-3.5">
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-[15px] font-semibold">Today&apos;s progress</span>
-            <span className="text-sm text-ink2">
-              <span className="font-semibold text-ink tabular-nums">{handled}</span> handled ·{" "}
-              <span className="font-semibold text-ink tabular-nums">{toGo}</span> to go
-            </span>
-          </div>
-          <div className="h-2.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Today's progress">
-            <div className="h-full rounded-full bg-gradient-to-r from-[var(--accent-top)] to-accent transition-[width] duration-500" style={{ width: `${Math.max(progress, handled ? 4 : 0)}%` }} />
-          </div>
-        </div>
       )}
 
       {groups.length === 0 && (
