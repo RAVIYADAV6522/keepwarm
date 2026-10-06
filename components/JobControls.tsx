@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useOptimistic, useTransition } from "react";
 import { moveStageAction, setFollowUpAction, setQuoteAction, setUrgencyAction, setVisitAction } from "@/app/actions";
 import { URGENCY, type Stage, type Urgency } from "@/lib/constants";
 import { STAGE_LABEL, URGENCY_LABEL } from "@/lib/format";
@@ -92,15 +92,22 @@ const TRACK: Stage[] = ["waiting_on_quote", "waiting_on_yes", "said_yes", "sched
 export function StageStepper({ job }: { job: CardJob }) {
   const { open, node } = useJobSheets(job);
   const [pending, start] = useTransition();
-  const idx = TRACK.indexOf(job.stage);
+  // Move the stepper the moment she taps; the server confirms a beat later.
+  const [stage, setStage] = useOptimistic(job.stage);
+  const idx = TRACK.indexOf(stage);
   const fill = idx <= 0 ? 0 : (idx / (TRACK.length - 1)) * 100;
 
-  const go = (stage: Stage) => {
-    if (stage === job.stage) return;
-    if (stage === "scheduled") return open("scheduled");
+  const go = (next: Stage) => {
+    if (next === stage) return;
+    if (next === "scheduled") return open("scheduled");
+    toast(`Moved to ${STAGE_LABEL[next]}`);
     start(async () => {
-      await moveStageAction(job.id, stage);
-      toast(`Moved to ${STAGE_LABEL[stage]}`);
+      setStage(next);
+      try {
+        await moveStageAction(job.id, next);
+      } catch {
+        toast("Couldn't save. Check your connection and try again.");
+      }
     });
   };
 

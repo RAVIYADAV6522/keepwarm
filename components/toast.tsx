@@ -7,6 +7,12 @@ export function toast(message: string) {
   window.dispatchEvent(new CustomEvent("keepwarm:toast", { detail: message }));
 }
 
+// Saves feel instant: the sheet closes and the toast shows straight away while the server catches up.
+// Only if the save fails do we say so.
+export function inBackground<T>(work: Promise<T>, onDone?: (result: T) => void) {
+  work.then(onDone, () => toast("Couldn't save. Check your connection and try again."));
+}
+
 export function Toaster() {
   const [message, setMessage] = useState<string | null>(null);
 

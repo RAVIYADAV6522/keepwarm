@@ -1,23 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { snoozeAction } from "@/app/actions";
 import { SNOOZE_LABEL, SNOOZE_OPTIONS, type SnoozeOption } from "@/lib/constants";
 import type { SheetJob } from "./LogSheet";
 import { Sheet } from "./Sheet";
-import { toast } from "./toast";
+import { inBackground, toast } from "./toast";
 
 // "Call me next week": take the job off Today until the day she picks.
 export function SnoozeSheet({ job, onClose }: { job: SheetJob; onClose: () => void }) {
   const [date, setDate] = useState("");
-  const [pending, start] = useTransition();
 
-  const snooze = (choice: SnoozeOption | { date: string }) =>
-    start(async () => {
-      const until = await snoozeAction(job.id, choice);
-      toast(`${job.name} · back on ${until}`);
-      onClose();
-    });
+  const snooze = (choice: SnoozeOption | { date: string }) => {
+    onClose();
+    inBackground(snoozeAction(job.id, choice), (until) => toast(`${job.name} · back on ${until}`));
+  };
 
   return (
     <Sheet title="Remind me later" subtitle={[job.name, job.contact].filter(Boolean).join(" · ")} onClose={onClose}>
@@ -26,7 +23,6 @@ export function SnoozeSheet({ job, onClose }: { job: SheetJob; onClose: () => vo
           <button
             key={o}
             type="button"
-            disabled={pending}
             onClick={() => snooze(o)}
             className="h-[60px] rounded-[14px] border-[1.5px] border-line text-base font-semibold hover:border-accent hover:bg-clay hover:text-clay-ink"
           >
@@ -42,7 +38,7 @@ export function SnoozeSheet({ job, onClose }: { job: SheetJob; onClose: () => vo
           onChange={(e) => setDate(e.target.value)}
           className="h-[52px] min-w-0 flex-1 rounded-[14px] border border-line bg-bg px-4 text-base outline-none focus:border-accent"
         />
-        <button type="button" disabled={!date || pending} onClick={() => snooze({ date })} className="btn-primary h-[52px] px-5 text-base">
+        <button type="button" disabled={!date} onClick={() => snooze({ date })} className="btn-primary h-[52px] px-5 text-base">
           Remind me
         </button>
       </div>

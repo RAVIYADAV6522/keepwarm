@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { logContactAction } from "@/app/actions";
 import { LOG_KINDS, LOG_LABEL, type LogKind } from "@/lib/constants";
 import { Sheet } from "./Sheet";
-import { toast } from "./toast";
+import { inBackground, toast } from "./toast";
 
 export type SheetJob = { id: number; name: string; contact: string; phoneDisplay: string; stage: string; quoteDollars: string };
 
@@ -14,15 +14,12 @@ export function LogSheet({ job, title = "Log contact", initialKind, onClose }: P
   const [kind, setKind] = useState<LogKind | null>(initialKind ?? null);
   const [note, setNote] = useState("");
   const [quote, setQuote] = useState(job.quoteDollars);
-  const [pending, start] = useTransition();
 
   const save = () => {
     if (!kind) return;
-    start(async () => {
-      await logContactAction(job.id, kind, note, kind === "quote_sent" ? quote : undefined);
-      toast(`${LOG_LABEL[kind]} · ${job.name}`);
-      onClose();
-    });
+    onClose();
+    toast(`${LOG_LABEL[kind]} · ${job.name}`);
+    inBackground(logContactAction(job.id, kind, note, kind === "quote_sent" ? quote : undefined));
   };
 
   return (
@@ -64,8 +61,8 @@ export function LogSheet({ job, title = "Log contact", initialKind, onClose }: P
         className="min-h-24 resize-none rounded-[14px] border border-line bg-bg p-3.5 text-base leading-snug outline-none"
       />
       {kind === "voicemail" && <p className="-mt-2 text-sm text-ink2">We&apos;ll put them back on your list tomorrow morning.</p>}
-      <button type="button" disabled={!kind || pending} onClick={save} className="btn-primary h-14 text-[17px]">
-        {pending ? "Saving…" : "Save"}
+      <button type="button" disabled={!kind} onClick={save} className="btn-primary h-14 text-[17px]">
+        Save
       </button>
     </Sheet>
   );

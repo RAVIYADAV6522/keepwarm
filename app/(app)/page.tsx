@@ -9,7 +9,7 @@ import { toCardJob } from "@/lib/view";
 
 export default async function TodayPage() {
   const now = new Date();
-  const { groups, snoozed, handled, calls, quotes } = await getToday(now);
+  const { groups, snoozed, handled, calls, quotes } = await getToday();
   const toGo = calls + quotes;
   const progress = handled + toGo ? Math.round((handled / (handled + toGo)) * 100) : 0;
   const tz = config.BUSINESS_TZ;

@@ -1,6 +1,7 @@
 import "server-only";
 import { and, asc, desc, eq, gte, inArray, ne, notInArray } from "drizzle-orm";
 import { connection } from "next/server";
+import { cache } from "react";
 import { getDb } from "@/db";
 import { activities, customers, jobs, type Customer, type Job } from "@/db/schema";
 import { config } from "./config";
@@ -22,7 +23,9 @@ function joinRows(rows: { jobs: Job; customers: Customer }[]): JobWithCustomer[]
   return rows.map((r) => ({ ...r.jobs, customer: r.customers }));
 }
 
-export async function getOpenJobs(): Promise<JobWithCustomer[]> {
+// cache(): the layout (sidebar counts) and the page both ask for these on the same request —
+// run each query once per request instead of once per caller.
+export const getOpenJobs = cache(async (): Promise<JobWithCustomer[]> => {
   const d = await db();
   const rows = await d
     .select()
@@ -30,14 +33,15 @@ export async function getOpenJobs(): Promise<JobWithCustomer[]> {
     .innerJoin(customers, eq(jobs.customerId, customers.id))
     .where(notInArray(jobs.stage, CLOSED));
   return joinRows(rows);
-}
+});
 
-export async function getToday(now = new Date()) {
+export const getToday = cache(async () => {
+  const now = new Date();
   const [open, handled] = await Promise.all([getOpenJobs(), handledToday(now)]);
   const groups = getTodayList(open, now, config);
   const snoozed = open.filter((j) => isSnoozed(j, now)).sort((a, b) => a.snoozedUntil!.getTime() - b.snoozedUntil!.getTime());
   return { groups, snoozed, handled, ...countCalls(groups) };
-}
+});
 
 // Jobs she has already dealt with today (called, texted, quoted, moved...), for the progress bar.
 const HANDLED_TYPES = ["called", "texted", "emailed", "voicemail", "quote_sent", "stage_change"] as const;
@@ -128,7 +132,7 @@ export async function getJobsByStage(stages: Job["stage"][]) {
 }
 
 export async function getDigest(now = new Date()) {
-  const [today, open] = await Promise.all([getToday(now), getOpenJobs()]);
+  const [today, open] = await Promise.all([getToday(), getOpenJobs()]);
   const waitingCents = open.filter((j) => j.stage === "waiting_on_yes").reduce((n, j) => n + (j.quoteAmount ?? 0), 0);
   return buildDigest(today, { open: open.length, waitingCents }, now);
 }
