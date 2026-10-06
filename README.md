@@ -2,13 +2,17 @@
 
 **Keep every lead warm.** A lead and follow-up tracker for small field-service businesses, starting with commercial refrigeration repair.
 
-Job requests arrive by phone, text, email, website form and a paper notebook. KeepWarm puts them all in one list, tracks where each job stands, and shows the owner one thing each morning: **who to call today**. A job stays on that list until it is done or lost, so no request goes cold because it was forgotten.
+Job requests arrive by phone, text, email, website form and a paper notebook. KeepWarm puts them all in one list, tracks where each job stands, and shows the owner one thing each morning: **who to call today**. A job stays on that list until it is done or lost, so no request goes cold because it was forgotten. Connect Gmail and enquiries from the owner's inbox arrive on their own, already filled in.
 
-**Live demo:** [keepwarm.vercel.app](https://keepwarm.vercel.app) (the passcode is filled in on the sign-in page). Use **Simulate leads** in the sidebar to send in a web form, email, customer text or missed call and watch it show up on Today.
+**Live demo:** [keepwarm.vercel.app](https://keepwarm.vercel.app) (the passcode is filled in on the sign-in page). Use **Simulate leads** in the sidebar to send in a web form, email, customer text or missed call, or **Inbox → Load sample emails** to try the email review flow.
 
 ![Today screen](docs/screenshots/today.png)
 
-| All jobs (dark mode) | Numbers (dark mode) | On a phone |
+| Email inbox | Job detail | Customer profile |
+|---|---|---|
+| ![Inbox with two email enquiries to review](docs/screenshots/inbox.png) | ![Job detail with a ready-to-send text](docs/screenshots/detail.png) | ![Customer profile with history and pinned note](docs/screenshots/customer.png) |
+
+| All jobs | Numbers | On a phone |
 |---|---|---|
 | ![All jobs board](docs/screenshots/jobs.png) | ![Numbers](docs/screenshots/numbers.png) | ![Today on a phone](docs/screenshots/today-mobile.png) |
 
@@ -89,7 +93,7 @@ Thresholds live in one place (`lib/config.ts`). "Today" is calculated in the bus
 
 ### Where AI is used
 
-AI is used for one thing: **turning a messy message into fields** (`lib/extract.ts`). With `ANTHROPIC_API_KEY` set, Claude Haiku 4.5 returns name, business, phone, email, address, a short problem summary, equipment, urgency, and whether the message is a job request at all. It uses structured outputs at temperature 0, and the result is validated with zod.
+AI is used for one thing: **turning a messy message into fields** (`lib/extract.ts`), whether it's a text, a voicemail transcript, a pasted note or an email from her inbox. With `ANTHROPIC_API_KEY` set, Claude Haiku 4.5 returns name, business, phone, email, address, a short problem summary, equipment, urgency, and whether the message is a job request at all. It uses structured outputs at temperature 0, and the result is validated with zod.
 
 Without a key, or if the call fails, times out or returns invalid data, a rule-based extractor (`lib/extract-rules.ts`) takes over, so a lead is never dropped because a model call failed. **The live demo runs on the rule-based extractor.**
 
@@ -138,9 +142,18 @@ All optional; see [`.env.example`](.env.example).
 ### Deploying to Vercel
 
 1. Import the repository in Vercel and add a Neon database from the Storage tab (it sets `DATABASE_URL`).
-2. Set `APP_PASSCODE`, `INBOUND_TOKEN` and `CRON_SECRET`, plus the Anthropic and Resend variables if wanted.
+2. Set `APP_PASSCODE`, `INBOUND_TOKEN`, `CRON_SECRET` and `APP_URL`, plus the Anthropic and Resend variables if wanted.
 3. Deploy. The build applies migrations. Load demo data once with `DATABASE_URL=… npm run seed`.
-4. The cron in `vercel.json` sends the morning email daily at 12:00 UTC.
+4. The cron in `vercel.json` checks Gmail and sends the morning email daily at 12:00 UTC.
+
+#### Connecting Gmail (optional)
+
+1. In [Google Cloud](https://console.cloud.google.com), create a project and enable the **Gmail API**.
+2. Under **Google Auth Platform**, set up the consent screen (External). While the app is in *Testing*, add each mailbox you'll connect under **Audience → Test users**.
+3. Create an OAuth client of type **Web application** with the redirect URI `<APP_URL>/api/gmail/callback`.
+4. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in Vercel and redeploy, then use **Inbox → Connect Gmail**.
+
+Access is read-only (`gmail.readonly`). The refresh token is stored encrypted, and emails that aren't enquiries are never stored. Publishing the app to more than 100 users requires Google's verification for this scope.
 
 ### Tests
 
