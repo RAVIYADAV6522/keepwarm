@@ -8,7 +8,7 @@ Job requests arrive by phone, text, email, website form and a paper notebook. Ke
 
 ![Today screen](docs/screenshots/today.png)
 
-| All jobs | Numbers (dark mode) | On a phone |
+| All jobs (dark mode) | Numbers (dark mode) | On a phone |
 |---|---|---|
 | ![All jobs board](docs/screenshots/jobs.png) | ![Numbers](docs/screenshots/numbers.png) | ![Today on a phone](docs/screenshots/today-mobile.png) |
 
