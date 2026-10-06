@@ -73,13 +73,15 @@ export async function getAccount(db: Db) {
   return account ?? null;
 }
 
-export type SyncResult = { checked: boolean; pending: number; auto: number; error?: string };
+// scanned: new emails looked at this time; pending/auto/ignored: what they became.
+export type SyncResult = { checked: boolean; scanned: number; pending: number; auto: number; ignored: number; error?: string };
 
 export async function syncGmail(db: Db, opts: { force?: boolean } = {}, now = new Date()): Promise<SyncResult> {
   const account = await getAccount(db);
-  if (!account) return { checked: false, pending: 0, auto: 0 };
+  const none = { scanned: 0, pending: 0, auto: 0, ignored: 0 };
+  if (!account) return { checked: false, ...none };
   if (!opts.force && account.lastSyncedAt && now.getTime() - account.lastSyncedAt.getTime() < MIN_GAP_MS) {
-    return { checked: false, pending: 0, auto: 0 };
+    return { checked: false, ...none };
   }
   // Claim the slot first so two tabs opening at once don't both sync.
   await db.update(gmailAccounts).set({ lastSyncedAt: now }).where(eq(gmailAccounts.id, account.id));
@@ -93,17 +95,16 @@ export async function syncGmail(db: Db, opts: { force?: boolean } = {}, now = ne
       ? new Set((await db.select({ g: inboxItems.gmailId }).from(inboxItems).where(inArray(inboxItems.gmailId, ids))).map((r) => r.g))
       : new Set<string>();
 
-    let pending = 0;
-    let auto = 0;
-    for (const id of ids.filter((i) => !known.has(i)).reverse()) {
+    const fresh = ids.filter((i) => !known.has(i)).reverse();
+    const result = { checked: true, scanned: fresh.length, pending: 0, auto: 0, ignored: 0 };
+    for (const id of fresh) {
       const outcome = await processEmail(db, await getMessage(token, id), now);
-      if (outcome === "pending") pending++;
-      if (outcome === "auto") auto++;
+      if (outcome === "pending" || outcome === "auto" || outcome === "ignored") result[outcome]++;
     }
-    return { checked: true, pending, auto };
+    return result;
   } catch (err) {
     console.error("[gmail] sync failed:", err);
-    return { checked: true, pending: 0, auto: 0, error: "Couldn't reach Gmail. Try reconnecting." };
+    return { checked: true, ...none, error: "Couldn't reach Gmail. Try reconnecting." };
   }
 }
 

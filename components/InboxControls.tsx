@@ -7,6 +7,14 @@ import { inBackground, toast } from "./toast";
 
 const enquiries = (n: number) => `${n} new ${n === 1 ? "enquiry" : "enquiries"} from email`;
 
+// Say exactly what "Check now" found, so an older item still waiting for review doesn't look like a bug.
+function checkSummary(r: { scanned: number; pending: number; auto: number }): string {
+  if (r.scanned === 0) return "No new emails since the last check";
+  const found = [r.pending ? `${r.pending} to review` : "", r.auto ? `${r.auto} added straight to Today` : ""].filter(Boolean).join(" · ");
+  if (found) return `${enquiries(r.pending + r.auto)}: ${found}`;
+  return `Checked ${r.scanned} new ${r.scanned === 1 ? "email" : "emails"}, none ${r.scanned === 1 ? "was a job enquiry" : "were job enquiries"}`;
+}
+
 // Mounted in the app layout when Gmail is connected: checks for new mail each time she opens the app
 // (the server skips it if it checked in the last 2 minutes).
 export function MailSync() {
@@ -30,7 +38,7 @@ export function CheckNowButton() {
     start(async () => {
       const r = await syncGmailAction(true);
       if (r.error) toast(r.error, { error: true });
-      else toast(r.pending || r.auto ? `${enquiries(r.pending + r.auto)}` : "No new enquiries");
+      else toast(checkSummary(r));
     });
   return (
     <button type="button" disabled={pending} onClick={check} className="btn-secondary h-10 px-4 text-sm">
