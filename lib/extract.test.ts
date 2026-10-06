@@ -95,6 +95,13 @@ describe("rule-based extractor on webhook text", () => {
     expect(r).toMatchObject({ business_name: "Tony's Diner", phone: "+13125550142", equipment: "ice_machine" });
   });
 
+  it("reads an email signature, and never takes an area code for a business", () => {
+    const r = extractWithRules("From: Dana Wells <dana@lakeshorehotel.com>\nSubject: Ice machine\n\nHi Denise,\n\nThe Hoshizaki is making half the ice it should.\n\nDana Wells\nLakeshore Hotel\n(312) 555-0266", "email");
+    expect(r).toMatchObject({ customer_name: "Dana Wells", business_name: "Lakeshore Hotel", phone: "+13125550266" });
+    const r2 = extractWithRules("We need a quote for two walk-ins.\n\nThanks,\nMarcus Bell\nOak & Ember Steakhouse\n773-555-0245", "email");
+    expect(r2).toMatchObject({ customer_name: "Marcus Bell", business_name: "Oak & Ember Steakhouse" });
+  });
+
   it("reads a voicemail transcript", () => {
     const r = extractWithRules("Missed call from (708) 555-0188. Voicemail:\nHi, this is Mark with Northgate Warehouse. One of our walk-in coolers is alarming at 48 degrees.", "call");
     expect(r.phone).toBe("+17085550188");

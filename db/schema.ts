@@ -1,6 +1,7 @@
 import {
   boolean,
   integer,
+  jsonb,
   pgTable,
   serial,
   text,
@@ -82,6 +83,33 @@ export const shareLinks = pgTable("share_links", {
   revokedAt: ts("revoked_at"),
 });
 
+// The connected Gmail account (one per business). The refresh token is stored encrypted.
+export const gmailAccounts = pgTable("gmail_accounts", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  lastSyncedAt: ts("last_synced_at"),
+  connectedAt: ts("connected_at").notNull().defaultNow(),
+});
+
+// Emails pulled from Gmail. Enquiries wait here ("pending") until she adds or dismisses them.
+// Non-enquiries keep only their Gmail id (so they're never fetched twice) — no subject, no body.
+export const INBOX_STATUSES = ["pending", "added", "auto", "dismissed", "ignored"] as const;
+export const inboxItems = pgTable("inbox_items", {
+  id: serial("id").primaryKey(),
+  gmailId: text("gmail_id").notNull().unique(),
+  fromName: text("from_name"),
+  fromEmail: text("from_email"),
+  subject: text("subject"),
+  body: text("body"),
+  extracted: jsonb("extracted"),
+  status: text("status", { enum: INBOX_STATUSES }).notNull(),
+  jobId: integer("job_id"),
+  receivedAt: ts("received_at").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+});
+
 export type Customer = typeof customers.$inferSelect;
 export type Job = typeof jobs.$inferSelect;
 export type Activity = typeof activities.$inferSelect;
+export type InboxItem = typeof inboxItems.$inferSelect;

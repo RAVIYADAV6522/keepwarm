@@ -43,3 +43,31 @@ export const DEMO_SAMPLES = {
 } as const;
 
 export type DemoKind = keyof typeof DEMO_SAMPLES;
+
+// Sample emails for the Inbox, so the review flow can be tried without connecting a real Gmail.
+export const SAMPLE_EMAILS = [
+  {
+    fromName: "Dana Wells",
+    fromEmail: "dana@lakeshorehotel.com",
+    subject: "Ice machine in the banquet kitchen",
+    text: "Hi Denise,\n\nThe Hoshizaki in our banquet kitchen is making about half the ice it should. We have a wedding Saturday so we'd love to get it looked at this week.\n\nDana Wells\nLakeshore Hotel\n(312) 555-0266",
+  },
+  {
+    fromName: "Marcus Bell",
+    fromEmail: "marcus@oakandembersteak.com",
+    subject: "Quote for a maintenance plan",
+    text: "Hello,\n\nWe're opening a second location next month and want a quarterly maintenance plan for two walk-in coolers and a walk-in freezer. Could you send a quote?\n\nThanks,\nMarcus Bell\nOak & Ember Steakhouse\n773-555-0245",
+  },
+  {
+    fromName: "Linh Tran",
+    fromEmail: "linh@saigonkitchen.com",
+    subject: "URGENT - freezer down",
+    text: "Our walk-in freezer is down since this morning and the temperature is climbing. Product at risk. Please call me asap: 708-555-0238",
+  },
+  {
+    fromName: "Growth Team",
+    fromEmail: "hello@rankfast.io",
+    subject: "Get 5x more customers this month",
+    text: "Hi there! Our SEO package will get your business to rank on Google page 1. 50% off this week only. Reply STOP to unsubscribe.",
+  },
+] as const;

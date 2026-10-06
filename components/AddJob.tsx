@@ -9,7 +9,7 @@ import type { CustomerMatch } from "@/lib/match";
 import { formatPhone } from "@/lib/phone";
 import { toast } from "./toast";
 
-type Fields = {
+export type Fields = {
   businessName: string;
   customerName: string;
   phone: string;
@@ -36,13 +36,16 @@ const URGENCY_ON: Record<Urgency, string> = {
   routine: "bg-surface text-ink border-line",
 };
 
-export function AddJob() {
+// Reviewing an email from the Inbox: the same preview, already filled in from the email.
+export type FromInbox = { inboxId: number; raw: string; fields: Fields; match: CustomerMatch | null; method: "claude" | "rules" | null; from: string };
+
+export function AddJob({ fromInbox }: { fromInbox?: FromInbox }) {
   const router = useRouter();
-  const [step, setStep] = useState<"input" | "loading" | "preview">("input");
-  const [raw, setRaw] = useState("");
-  const [f, setF] = useState<Fields>(EMPTY);
-  const [match, setMatch] = useState<CustomerMatch | null>(null);
-  const [method, setMethod] = useState<"claude" | "rules" | null>(null);
+  const [step, setStep] = useState<"input" | "loading" | "preview">(fromInbox ? "preview" : "input");
+  const [raw, setRaw] = useState(fromInbox?.raw ?? "");
+  const [f, setF] = useState<Fields>(fromInbox?.fields ?? EMPTY);
+  const [match, setMatch] = useState<CustomerMatch | null>(fromInbox?.match ?? null);
+  const [method, setMethod] = useState<"claude" | "rules" | null>(fromInbox?.method ?? null);
   const [error, setError] = useState<string | null>(null);
   const [saving, start] = useTransition();
   const set = <K extends keyof Fields>(k: K, v: Fields[K]) => setF((x) => ({ ...x, [k]: v }));
@@ -105,6 +108,7 @@ export function AddJob() {
           },
           raw,
           attachToJobId,
+          fromInbox?.inboxId,
         );
         if ("error" in result) {
           setError(result.error ?? "Could not save");
@@ -130,7 +134,7 @@ export function AddJob() {
   return (
     <div className="mx-auto flex max-w-[560px] flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h1 className="font-serif text-[30px]">{step === "preview" ? "Check the details" : "New job"}</h1>
+        <h1 className="font-serif text-[30px]">{fromInbox ? "Review email" : step === "preview" ? "Check the details" : "New job"}</h1>
         <button type="button" aria-label="Close" onClick={() => router.back()} className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-xl text-ink2">
           ×
         </button>
@@ -180,6 +184,7 @@ export function AddJob() {
       {step === "preview" && (
         <div className="flex flex-col gap-4">
           <div className="-mt-2 text-[15px] text-ink2">
+            {fromInbox && <>From {fromInbox.from}. </>}
             Tap anything to fix it.{method === "rules" && raw ? " (Quick read — double-check the details.)" : ""}
           </div>
 

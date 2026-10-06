@@ -26,6 +26,7 @@ The first customer runs a commercial refrigeration repair company (walk-in coole
 | "Did I send the quote? Did they say yes?" | Two-tap contact logging, opened automatically after a call or text |
 | "Call me next week" requests that would otherwise nag daily | Snooze until a chosen day; a message from the customer ends it early |
 | Following up takes time she does not have | Ready-to-send texts for each stage, sent from her own phone |
+| Enquiries arrive in her email inbox | Connect Gmail (read-only); enquiries wait in an Inbox for a quick check, emergencies go straight onto Today |
 | Requests arrive in five places | One intake pipeline behind the web form, email, SMS and missed-call webhooks, plus quick add |
 | She thinks in customers, not jobs | Customer profiles with history, money earned and a pinned note shown on every job |
 | Many requests are repeat customers | Customers matched by phone number; replies attach to the open job instead of duplicating it |
@@ -45,6 +46,8 @@ The first customer runs a commercial refrigeration repair company (walk-in coole
 **The phone number is the customer's identity.** Repeat customers mostly text or call, so numbers are normalized to E.164 and used to match customers. Email is the fallback.
 
 **Call and Text open her own phone apps.** Customers keep seeing her number, and there is no carrier registration (A2P 10DLC) or risk of automated texts reaching restaurant owners.
+
+**Email enquiries are reviewed, not auto-added.** A misread email that lands straight on Today costs her trust in the list. So enquiries wait in an Inbox with the fields filled in, and she confirms with one tap. The exceptions are the ones where waiting costs money: emergencies go straight onto Today with an alert, and replies from customers with an open job are attached to that job. Gmail access is read-only, the token is stored encrypted, and emails that aren't enquiries are never stored, only their ID so they aren't fetched twice.
 
 **A shared passcode instead of accounts.** Two people use it. Accounts and roles would add setup without solving anything she raised.
 

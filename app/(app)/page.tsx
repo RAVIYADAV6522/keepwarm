@@ -4,12 +4,14 @@ import { TodayCard } from "@/components/TodayCard";
 import { config, OWNER_NAME } from "@/lib/config";
 import { plural, TONE_DOT, TONE_TEXT } from "@/lib/format";
 import { getToday } from "@/lib/queries";
+import { getDb } from "@/db";
+import { pendingCount } from "@/lib/mailbox";
 import { formatDate, hourIn } from "@/lib/time";
 import { toCardJob } from "@/lib/view";
 
 export default async function TodayPage() {
   const now = new Date();
-  const { groups, snoozed, handled, calls, quotes } = await getToday();
+  const [{ groups, snoozed, handled, calls, quotes }, inbox] = await Promise.all([getToday(), getDb().then(pendingCount)]);
   const toGo = calls + quotes;
   const progress = handled + toGo ? Math.round((handled / (handled + toGo)) * 100) : 0;
   const tz = config.BUSINESS_TZ;
@@ -29,6 +31,18 @@ export default async function TodayPage() {
         </div>
         {summary && <div className="rounded-full bg-clay px-[15px] py-[9px] text-[15px] font-semibold text-clay-ink">{summary}</div>}
       </div>
+
+      {inbox > 0 && (
+        <Link href="/inbox" className="card card-hover flex items-center justify-between gap-3 px-4 py-3.5">
+          <span className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-clay text-[15px] font-semibold text-clay-ink">{inbox}</span>
+            <span className="text-[15px] font-semibold">
+              {inbox === 1 ? "1 email enquiry" : `${inbox} email enquiries`} to review
+            </span>
+          </span>
+          <span className="text-sm font-semibold text-clay-ink">Review ›</span>
+        </Link>
+      )}
 
       {handled + toGo > 0 && (
         <div className="card flex flex-col gap-3 px-4 py-3.5">

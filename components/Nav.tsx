@@ -9,10 +9,11 @@ const isActive = (path: string, href: string) =>
 
 type Account = { owner: string; business: string; canLogout: boolean };
 
-export function Sidebar({ todayCount, openCount, account }: { todayCount: number; openCount: number; account: Account }) {
+export function Sidebar({ todayCount, openCount, inboxCount, account }: { todayCount: number; openCount: number; inboxCount: number; account: Account }) {
   const path = usePathname();
   const items = [
     { href: "/", label: "Today", count: todayCount },
+    { href: "/inbox", label: "Inbox", count: inboxCount || null },
     { href: "/jobs", label: "All jobs", count: openCount },
     { href: "/customers", label: "Customers", count: null },
     { href: "/numbers", label: "Numbers", count: null },
@@ -105,16 +106,17 @@ function AccountRow({ account }: { account: Account }) {
 }
 
 // Phones have no sidebar, so the tools and log out live in a small list at the bottom of each page.
-export function MobileFooter({ account }: { account: Account }) {
+export function MobileFooter({ account, inboxCount }: { account: Account; inboxCount: number }) {
   const row = "flex h-[52px] w-full items-center gap-3 px-4 text-[15px] text-ink";
   return (
     <div className="mt-12 flex flex-col gap-2.5 lg:hidden">
       <div className="px-1 text-[11.5px] font-semibold tracking-[0.06em] text-ink2 uppercase">More</div>
       <div className="card divide-y divide-line overflow-hidden">
-        {[{ href: "/customers", label: "Customers", Icon: PeopleIcon }, ...TOOLS].map((t) => (
+        {[{ href: "/inbox", label: "Inbox", Icon: InboxIcon, count: inboxCount }, { href: "/customers", label: "Customers", Icon: PeopleIcon, count: 0 }, ...TOOLS.map((t) => ({ ...t, count: 0 }))].map((t) => (
           <Link key={t.href} href={t.href} className={row}>
             <span className="text-ink2"><t.Icon /></span>
             <span className="flex-1">{t.label}</span>
+            {t.count > 0 && <span className="rounded-full bg-accent px-2 py-0.5 text-[12px] font-semibold text-on-accent">{t.count}</span>}
             <span className="text-ink2">›</span>
           </Link>
         ))}
@@ -172,6 +174,15 @@ export function LogoMark({ size = 30 }: { size?: number }) {
       </defs>
       <rect width="64" height="64" rx="16" fill="url(#kw-brass)" />
       <path d="M32 14c-6 9-12 14-12 23a12 12 0 0 0 24 0c0-5-2-8-5-12-1 4-3 6-5 7 1-6 0-12-2-18Z" fill="#141A2B" />
+    </svg>
+  );
+}
+
+function InboxIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 13.5 6.5 5h11L20 13.5V19H4v-5.5Z" />
+      <path d="M4 13.5h4.5l1 2h5l1-2H20" />
     </svg>
   );
 }

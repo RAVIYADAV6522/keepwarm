@@ -1,3 +1,5 @@
+import { getDb } from "@/db";
+import { syncGmail } from "@/lib/mailbox";
 import { sendEmail } from "@/lib/notify";
 import { getDigest } from "@/lib/queries";
 
@@ -9,6 +11,8 @@ export async function GET(req: Request) {
   if (!allowed) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Pick up overnight email enquiries first, so emergencies make the morning list.
+  await syncGmail(await getDb(), { force: true });
   const digest = await getDigest();
   const sent = await sendEmail(digest);
   return Response.json({ sent, subject: digest.subject });

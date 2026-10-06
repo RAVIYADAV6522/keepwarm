@@ -66,12 +66,16 @@ function titleCase(s: string) {
 function guessWho(text: string): { name: string | null; business: string | null; matched?: string } {
   const intro = /\b(?:this is|it'?s|its|i'?m|my name is)\s+([a-z]+(?:\s+[a-z]+)?)\s+(?:from|at|with)\s+(?:the\s+)?([a-z0-9'&.\s]{2,40}?)(?=[.,!\n]|\s+(?:our|the|we|my|and|walk|freezer|cooler|ice)\b|$)/i.exec(text);
   if (intro) return { name: titleCase(intro[1].trim()), business: titleCase(intro[2].trim()), matched: intro[0] };
-  const paren = /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s*\(([^)]{2,40})\)/.exec(text);
+  // "Tony (Tony's Diner)" — but not "Lakeshore Hotel (312) 555-…": the bracket must start with a letter.
+  const paren = /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s*\(([A-Za-z][^)]{1,39})\)/.exec(text);
   if (paren) return { name: paren[1], business: paren[2].trim(), matched: paren[0] };
   const opener = /^\s*(?:hi,?\s+)?([a-z]+)\s+(?:from|at)\s+([a-z0-9'&.\s]{2,30}?)(?=[.,!\n]|\s+(?:our|the|we|my|and|walk|freezer|cooler|ice|got)\b)/i.exec(text.replace(/^(?:missed call from[^.]*\.\s*(?:voicemail:)?|text from[^:]*:)\s*/i, ""));
   if (opener && !/^(?:hi|hey|hello)$/i.test(opener[1])) return { name: titleCase(opener[1]), business: titleCase(opener[2].trim()), matched: opener[0] };
   const called = /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+from\s+([A-Z][\w'&]*(?:\s[A-Z][\w'&]*)*)/.exec(text);
   if (called) return { name: called[1], business: called[2], matched: called[0] };
+  // An email signature: "Dana Wells / Lakeshore Hotel / (312) 555-0266" on their own lines.
+  const signature = /(?:^|\n)\s*([A-Z][a-z]+ [A-Z][a-z'-]+)\s*\n\s*([A-Z][\w'&.]*(?: (?:[A-Z&][\w'&.]*|of|and|the))*)\s*(?:\n|$)/.exec(text);
+  if (signature && !/^(?:thanks|regards|best|cheers|sincerely)/i.test(signature[1])) return { name: signature[1], business: signature[2] };
   return { name: null, business: null };
 }
 
@@ -92,10 +96,13 @@ export function summarizeProblem(body: string): string {
   return short ? short[0].toUpperCase() + short.slice(1) : "";
 }
 
+// Email header lines ("From:", "Subject:"...) say who wrote, not what's wrong — keep them out of the problem line.
+const HEADER_RE = /^\s*(?:from|to|cc|reply-to|subject|date|sent)\s*:.*$/gim;
+
 export function extractWithRules(raw: string, hint?: Source): Extracted {
   const text = raw.trim();
   const fields = labelled(text);
-  const body = fields.message ?? fields.details ?? text;
+  const body = fields.message ?? fields.details ?? (text.replace(HEADER_RE, "").trim() || text);
   const who = guessWho(body);
 
   const phoneMatch = (fields.phone ?? text).match(PHONE_RE);

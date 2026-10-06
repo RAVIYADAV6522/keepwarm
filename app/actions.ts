@@ -9,7 +9,10 @@ import { EQUIPMENT, LOG_KINDS, SNOOZE_OPTIONS, SOURCES, STAGES, URGENCY, type Lo
 import { config } from "@/lib/config";
 import { attachMessage, createJob } from "@/lib/intake";
 import { addNote, logContact, moveStage, snooze, snoozeTarget, updateJob, wake } from "@/lib/jobs";
-import { DEMO_SAMPLES, type DemoKind } from "@/lib/demo-samples";
+import { DEMO_SAMPLES, SAMPLE_EMAILS, type DemoKind } from "@/lib/demo-samples";
+import { decryptToken, revoke } from "@/lib/gmail";
+import { getAccount, processEmail, resolveItem, syncGmail } from "@/lib/mailbox";
+import { gmailAccounts } from "@/db/schema";
 import { matchCustomer } from "@/lib/match";
 import { sendEmergencyAlert } from "@/lib/notify";
 import { seed } from "@/lib/seed";
@@ -87,6 +90,45 @@ export async function setCustomerNoteAction(customerId: number, note: string) {
   refresh();
 }
 
+// --- Gmail inbox ---------------------------------------------------------------------------------
+
+// Called when the app opens (throttled to every 2 minutes) and by "Check now".
+export async function syncGmailAction(force = false) {
+  await requireAuth();
+  const result = await syncGmail(await getDb(), { force });
+  if (result.pending || result.auto) refresh();
+  return result;
+}
+
+export async function disconnectGmailAction() {
+  await requireAuth();
+  const db = await getDb();
+  const account = await getAccount(db);
+  if (!account) return;
+  await db.delete(gmailAccounts);
+  await revoke(await decryptToken(account.refreshToken)).catch(() => {});
+  refresh();
+}
+
+export async function dismissInboxAction(id: number) {
+  await requireAuth();
+  await resolveItem(await getDb(), id, "dismissed");
+  refresh();
+}
+
+// Demo: run four realistic emails through the same pipeline a real Gmail message goes through.
+export async function loadSampleEmailsAction() {
+  await requireAuth();
+  const db = await getDb();
+  const stamp = Date.now();
+  const outcomes = [];
+  for (const [i, m] of SAMPLE_EMAILS.entries()) {
+    outcomes.push(await processEmail(db, { ...m, id: `sample-${stamp}-${i}`, receivedAt: new Date(stamp - (SAMPLE_EMAILS.length - i) * 600_000) }));
+  }
+  refresh();
+  return outcomes;
+}
+
 export async function createShareAction() {
   await requireAuth();
   const token = await createShare(await getDb());
@@ -138,7 +180,7 @@ const JobInputSchema = z.object({
 
 // Save from the "+" screen. Either a new job, or (for a repeat customer with an open job)
 // a note on that job so the same request doesn't show up twice.
-export async function saveJobAction(input: z.input<typeof JobInputSchema>, raw: string, attachToJobId?: number) {
+export async function saveJobAction(input: z.input<typeof JobInputSchema>, raw: string, attachToJobId?: number, inboxId?: number) {
   await requireAuth();
   // Problems come back as values: Next.js hides thrown error messages in production.
   const parsed = JobInputSchema.safeParse(input);
@@ -155,10 +197,12 @@ export async function saveJobAction(input: z.input<typeof JobInputSchema>, raw: 
     const [job] = await db.select().from(jobs).where(eq(jobs.id, attachToJobId));
     if (!job) return { error: "That job no longer exists" };
     await attachMessage(db, job, raw || data.problem, data.source);
+    if (inboxId) await resolveItem(db, inboxId, "added", job.id);
     refresh();
     return { jobId: job.id, attached: true };
   }
-  const job = await createJob(db, data, { raw });
+  const job = await createJob(db, data, { raw, autoAdded: !!inboxId });
+  if (inboxId) await resolveItem(db, inboxId, "added", job.id);
   if (job.urgency === "emergency") await sendEmergencyAlert(db, job.id);
   refresh();
   return { jobId: job.id, attached: false };

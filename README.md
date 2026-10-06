@@ -22,7 +22,8 @@ Job requests arrive by phone, text, email, website form and a paper notebook. Ke
 6. **Ready-to-send text.** Open FreshMart Grocery. The text under the Call and Text buttons is the follow-up on their $1,250 quote, already written.
 7. **Snooze.** On Luigi's Pizzeria, tap **···** → *Remind me later* → *Monday*. It moves to the Snoozed list at the bottom of Today.
 8. **Customer profile.** Tap *Tony's Diner* on any of its jobs: four jobs, $1,110 earned, and a pinned note with the door code.
-9. **Numbers and sharing.** Open jobs, money waiting on a yes, and where leads come from. Press *Create a read-only link* and open it in a private window: the numbers, without the passcode or any way to change anything.
+9. **Email inbox.** Open **Inbox** and press *Load sample emails*: two enquiries wait for review, a "freezer down" email goes straight onto Today, and an SEO pitch is skipped. Tap *Review & add* to check the details and save it as a job.
+10. **Numbers and sharing.** Open jobs, money waiting on a yes, and where leads come from. Press *Create a read-only link* and open it in a private window: the numbers, without the passcode or any way to change anything.
 
 *Reset demo data* on the Simulate leads page restores the starting state.
 
@@ -40,6 +41,7 @@ For the reasoning behind the product (the problem, key decisions, assumptions, r
 - **Ready-to-send texts.** The Text button opens the phone's Messages app with a message written for where the job stands: a reply to a new request, a nudge on an unanswered quote, a visit confirmation. It is sent from the owner's own number, and "Texted" is logged with one tap afterwards.
 - **Two-tap contact logging.** Talked to them, left a voicemail, texted, emailed, sent a quote, they said yes. After a call, the "How did it go?" sheet is already open.
 - **One intake pipeline.** Website form, email, SMS and missed-call webhooks all go through the same `intake()` function. Spam and invoices are filtered out, and a message from a customer who already has an open job is added to that job instead of creating a duplicate.
+- **Gmail inbox.** Connect Gmail once (read-only) and new enquiries arrive in an Inbox with name, phone, problem and urgency already filled in. She checks them and taps *Add as job* or *Not a job*. Emergencies skip the queue and go straight onto Today with an alert; replies from customers with an open job are added to that job; newsletters are skipped and their content is never stored.
 - **Quick add.** Paste a text or email, or dictate with the keyboard mic. The message is turned into structured fields, shown for review, and saved. Repeat customers are recognised by phone number.
 - **Emergency alerts and a morning email.** "Freezer down" requests send an alert immediately. A daily email repeats the Today list.
 - **Numbers.** Open jobs, new this week, dollars waiting on a yes, won and lost this month (with the reasons jobs were lost), and new leads per week by source.
@@ -124,6 +126,7 @@ All optional; see [`.env.example`](.env.example).
 | Variable | Effect |
 |---|---|
 | `DATABASE_URL` | Use Postgres (e.g. Neon) instead of PGlite |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Enable *Connect Gmail* on the Inbox (Google OAuth client with the Gmail API, redirect URI `<APP_URL>/api/gmail/callback`) |
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | Claude extraction (default `claude-haiku-4-5`) instead of rules |
 | `RESEND_API_KEY`, `ALERT_EMAIL_TO`, `ALERT_EMAIL_FROM`, `APP_URL` | Send emergency alerts and the morning email (otherwise logged to the console) |
 | `APP_PASSCODE` | Require a shared passcode (httpOnly cookie, 90 days) |
@@ -148,6 +151,7 @@ All optional; see [`.env.example`](.env.example).
 | `lib/intake.test.ts` | New leads, repeat-customer messages, emergencies, spam, missed calls |
 | `lib/extract.test.ts` | Extraction from a messy SMS, a forwarded form email, a notebook note and spam (also against Claude when a key is set) |
 | `lib/messages.test.ts` | Ready-to-send texts for each stage |
+| `lib/gmail.test.ts`, `lib/mailbox.test.ts` | Reading Gmail messages (multipart, HTML, quoted replies), token encryption, and what each email becomes (review, auto-added, attached, skipped) |
 | `lib/customers.test.ts` | Customer roll-ups (earned, win rate, latest job) and ranking |
 | `lib/share.test.ts`, `lib/csv.test.ts` | Share links (create, replace, revoke) and safe CSV output |
 | `lib/phone.test.ts`, `lib/numbers.test.ts` | Phone normalization and reporting |
@@ -161,6 +165,9 @@ app/contact         Public sample contact form
 app/api/inbound/*   Intake webhooks
 app/api/extract     Text → fields for quick add
 app/api/export      CSV downloads
+app/api/gmail/*     Connect Gmail (Google sign-in) and its callback
+lib/gmail.ts        Gmail API client, message parsing, token encryption
+lib/mailbox.ts      What each email becomes, and the sync
 app/api/cron/digest Daily morning email
 app/actions.ts      Server actions (thin wrappers around lib/)
 lib/today.ts        Today ranking
