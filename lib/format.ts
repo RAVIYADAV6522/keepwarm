@@ -1,4 +1,5 @@
 import type { Equipment, Source, Stage, Urgency } from "./constants";
+import { formatPhone } from "./phone";
 
 export const STAGE_LABEL: Record<Stage, string> = {
   new: "New",
@@ -81,8 +82,8 @@ export function dollarsToCents(value: string | number | null | undefined): numbe
   return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) : null;
 }
 
-export function displayName(c: { businessName: string | null; name: string | null }): string {
-  return c.businessName || c.name || "Unknown caller";
+export function displayName(c: { businessName: string | null; name: string | null; phone?: string | null; email?: string | null }): string {
+  return c.businessName || c.name || formatPhone(c.phone) || c.email || "Unknown caller";
 }
 
 export function plural(n: number, word: string, many = word + "s"): string {

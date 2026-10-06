@@ -68,6 +68,8 @@ function guessWho(text: string): { name: string | null; business: string | null;
   if (intro) return { name: titleCase(intro[1].trim()), business: titleCase(intro[2].trim()), matched: intro[0] };
   const paren = /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s*\(([^)]{2,40})\)/.exec(text);
   if (paren) return { name: paren[1], business: paren[2].trim(), matched: paren[0] };
+  const opener = /^\s*(?:hi,?\s+)?([a-z]+)\s+(?:from|at)\s+([a-z0-9'&.\s]{2,30}?)(?=[.,!\n]|\s+(?:our|the|we|my|and|walk|freezer|cooler|ice|got)\b)/i.exec(text.replace(/^(?:missed call from[^.]*\.\s*(?:voicemail:)?|text from[^:]*:)\s*/i, ""));
+  if (opener && !/^(?:hi|hey|hello)$/i.test(opener[1])) return { name: titleCase(opener[1]), business: titleCase(opener[2].trim()), matched: opener[0] };
   const called = /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)?)\s+from\s+([A-Z][\w'&]*(?:\s[A-Z][\w'&]*)*)/.exec(text);
   if (called) return { name: called[1], business: called[2], matched: called[0] };
   return { name: null, business: null };
@@ -81,7 +83,9 @@ export function summarizeProblem(body: string): string {
     .replace(new RegExp(EMAIL_RE.source, "g"), "")
     .replace(/\s+/g, " ")
     .trim()
+    .replace(/^(?:missed call from[^.]*\.\s*(?:no voicemail\.?|voicemail:)?|text from[^:]*:)\s*/i, "")
     .replace(GREETING_RE, "")
+    .replace(/^[\s,.;:!—-]+/, "")
     .trim();
   const first = (cleaned.split(/(?<=[.!?])\s/)[0] || cleaned).replace(/[.!?]+$/, "");
   const short = first.length > 90 ? first.slice(0, 87).replace(/\s+\S*$/, "") + "…" : first;

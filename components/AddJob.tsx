@@ -202,14 +202,24 @@ export function AddJob() {
             {fields.map((field) => (
               <label key={field.key} className="flex flex-col gap-[3px] border-b border-line px-4 py-2.5">
                 <span className="field-label">{field.label}</span>
-                <input
-                  type={field.type ?? "text"}
-                  value={f[field.key]}
-                  onChange={(e) => set(field.key, e.target.value as never)}
-                  onBlur={field.key === "phone" || field.key === "email" ? rematch : undefined}
-                  placeholder={field.ph}
-                  className="bg-transparent py-0.5 text-base leading-snug outline-none placeholder:text-ink2/60"
-                />
+                {field.key === "problem" ? (
+                  <textarea
+                    rows={2}
+                    value={f.problem}
+                    onChange={(e) => set("problem", e.target.value)}
+                    placeholder={field.ph}
+                    className="resize-none bg-transparent py-0.5 text-base leading-snug outline-none placeholder:text-ink2/60"
+                  />
+                ) : (
+                  <input
+                    type={field.type ?? "text"}
+                    value={f[field.key]}
+                    onChange={(e) => set(field.key, e.target.value as never)}
+                    onBlur={field.key === "phone" || field.key === "email" ? rematch : undefined}
+                    placeholder={field.ph}
+                    className="bg-transparent py-0.5 text-base leading-snug outline-none placeholder:text-ink2/60"
+                  />
+                )}
               </label>
             ))}
             <div className="flex flex-col gap-2 border-b border-line px-4 py-3">

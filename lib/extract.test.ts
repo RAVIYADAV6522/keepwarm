@@ -82,3 +82,17 @@ describe.skipIf(!process.env.ANTHROPIC_API_KEY)("Claude extractor", () => {
     expect(spam.is_job_request).toBe(false);
   });
 });
+
+describe("rule-based extractor on webhook text", () => {
+  it("drops the 'Text from' prefix and reads a lowercase intro", () => {
+    const r = extractWithRules("Text from +17735550144:\njoe from joes tacos walk in freezer not freezing, food is thawing", "text");
+    expect(r).toMatchObject({ customer_name: "Joe", business_name: "Joes Tacos", urgency: "emergency", equipment: "walk_in_freezer" });
+    expect(r.problem).toBe("Walk in freezer not freezing, food is thawing");
+  });
+
+  it("reads a voicemail transcript", () => {
+    const r = extractWithRules("Missed call from (708) 555-0188. Voicemail:\nHi, this is Mark with Northgate Warehouse. One of our walk-in coolers is alarming at 48 degrees.", "call");
+    expect(r.phone).toBe("+17085550188");
+    expect(r.problem).toBe("One of our walk-in coolers is alarming at 48 degrees");
+  });
+});

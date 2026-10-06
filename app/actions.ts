@@ -2,6 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { z } from "zod";
 import { getDb } from "@/db";
 import { jobs } from "@/db/schema";
@@ -9,8 +10,10 @@ import { EQUIPMENT, LOG_KINDS, SOURCES, STAGES, URGENCY, type LogKind, type Stag
 import { config } from "@/lib/config";
 import { attachMessage, createJob } from "@/lib/intake";
 import { addNote, logContact, moveStage, updateJob } from "@/lib/jobs";
+import { DEMO_SAMPLES, type DemoKind } from "@/lib/demo-samples";
 import { matchCustomer } from "@/lib/match";
 import { sendEmergencyAlert } from "@/lib/notify";
+import { seed } from "@/lib/seed";
 import { dollarsToCents } from "@/lib/format";
 import { fromDateInput } from "@/lib/time";
 
@@ -94,4 +97,26 @@ export async function saveJobAction(input: z.input<typeof JobInputSchema>, raw: 
   if (job.urgency === "emergency") await sendEmergencyAlert(db, job.id);
   refresh();
   return { jobId: job.id, attached: false };
+}
+
+// /demo: post a realistic payload to the real webhook route, exactly like Twilio or an email service would.
+export async function simulateAction(kind: DemoKind, index: number) {
+  const samples = DEMO_SAMPLES[kind];
+  const payload = samples[index % samples.length];
+  const h = await headers();
+  const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
+  const path = { webform: "webform", email: "email", sms: "sms", call: "call" }[kind];
+  const token = process.env.INBOUND_TOKEN ? `?token=${encodeURIComponent(process.env.INBOUND_TOKEN)}` : "";
+  const res = await fetch(`${origin}/api/inbound/${path}${token}`, {
+    method: "POST",
+    headers: { "content-type": "application/json", cookie: h.get("cookie") ?? "" },
+    body: JSON.stringify(payload),
+  });
+  refresh();
+  return { status: res.status, payload, result: await res.json() };
+}
+
+export async function resetDemoAction() {
+  await seed(await getDb());
+  refresh();
 }

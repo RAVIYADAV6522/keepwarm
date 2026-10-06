@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Newsreader } from "next/font/google";
-import { BottomBar, Sidebar } from "@/components/Nav";
 import { Toaster } from "@/components/toast";
-import { getToday, getOpenJobs } from "@/lib/queries";
 import "./globals.css";
 
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
@@ -20,19 +18,11 @@ export const viewport: Viewport = {
   ],
 };
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [today, open] = await Promise.all([getToday(), getOpenJobs()]);
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geist.variable} ${newsreader.variable} antialiased`}>
       <body className="font-sans">
-        <div className="flex min-h-dvh">
-          {/* Same number as the Today header, so the badge and the page always agree. */}
-          <Sidebar todayCount={today.calls} openCount={open.length} />
-          <main className="min-w-0 flex-1">
-            <div className="mx-auto w-full max-w-[1200px] px-5 pt-7 pb-32 lg:px-10 lg:pt-10 lg:pb-16">{children}</div>
-          </main>
-        </div>
-        <BottomBar />
+        {children}
         <Toaster />
       </body>
     </html>
