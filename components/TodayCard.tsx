@@ -30,7 +30,7 @@ export function TodayCard({ job, reason, tone, suggestLost, attempts }: Props) {
     <>
       <div
         onClick={() => router.push(`/jobs/${job.id}`)}
-        className="card relative flex cursor-pointer flex-col gap-2.5 p-4 transition-colors hover:border-accent"
+        className="card card-hover relative flex cursor-pointer flex-col gap-2.5 p-4"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-col gap-0.5">
@@ -88,7 +88,7 @@ export function TodayCard({ job, reason, tone, suggestLost, attempts }: Props) {
         </div>
 
         {menu && (
-          <div onClick={stop} className="absolute right-3 bottom-[68px] z-10 flex w-[200px] flex-col rounded-[14px] border border-line bg-surface p-1.5 shadow-[0_12px_32px_rgba(20,20,19,.16)]">
+          <div onClick={stop} className="absolute right-3 bottom-[68px] z-10 flex w-[200px] flex-col rounded-[14px] border border-line bg-surface p-1.5 shadow-[var(--shadow-lift)]">
             <button type="button" onClick={() => { setMenu(false); setSheet("log"); }} className="flex h-11 items-center rounded-[10px] px-3 text-left text-[15px] font-medium hover:bg-muted">
               Log contact
             </button>

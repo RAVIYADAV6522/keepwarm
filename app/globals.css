@@ -1,26 +1,37 @@
 @import "tailwindcss";
 
-/* Design tokens. Colour is only used for meaning:
-   red = emergency, amber = waiting on them, green = won/done, blue = scheduled, clay = new. */
+/* Design tokens: "Midnight & Ember". A midnight sidebar, crisp neutral pages, and one warm ember accent.
+   Colour is only used for meaning: red = emergency, amber = waiting on them, green = won/done,
+   blue = scheduled, clay (ember tint) = new. */
 :root {
-  --bg: #faf9f5;
+  --bg: #f4f5f8;
   --surface: #ffffff;
-  --line: #e8e6dc;
-  --ink: #141413;
-  --ink2: #6b6a65;
-  --accent: #d97757;
-  --accent-h: #c15f3c;
-  --clay: #f5e6dd;
-  --clay-ink: #a9502f;
-  --muted: #f3f1ea;
-  --red: #b53d2e;
-  --red-s: #f8e1dc;
-  --amber: #b7791f;
-  --amber-s: #fbf0d9;
-  --green: #5a7d4f;
-  --green-s: #e6efe1;
-  --blue: #4a6fa5;
-  --blue-s: #e3eaf4;
+  --line: #e3e6ec;
+  --ink: #0e1220;
+  --ink2: #5d6476;
+  --accent: #f0602f;
+  --accent-h: #dc4e1d;
+  --accent-top: #ff7a45;
+  --accent-glow: rgb(240 96 47 / 0.32);
+  --clay: #ffece3;
+  --clay-ink: #c2410c;
+  --muted: #eef0f4;
+  --red: #d42a35;
+  --red-s: #fde8e9;
+  --amber: #b45309;
+  --amber-s: #fef3dc;
+  --green: #0f7b5f;
+  --green-s: #ddf5ec;
+  --blue: #3b5bdb;
+  --blue-s: #e6ebff;
+  /* Midnight sidebar, the same in light and dark. */
+  --side: #0e1220;
+  --side-2: #161b2c;
+  --side-line: #232a3d;
+  --side-ink: #eef1f8;
+  --side-ink2: #8d95aa;
+  --shadow: 0 1px 2px rgb(14 18 32 / 0.05), 0 8px 24px rgb(14 18 32 / 0.06);
+  --shadow-lift: 0 2px 4px rgb(14 18 32 / 0.06), 0 16px 36px rgb(14 18 32 / 0.1);
   /* Lead sources in the Numbers chart: fixed categorical order, validated for colour-blind separation. */
   --src-call: #2a78d6;
   --src-text: #eb6834;
@@ -32,24 +43,33 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1f1e1d;
-    --surface: #2a2928;
-    --line: #3a3936;
-    --ink: #f0eee6;
-    --ink2: #a9a79f;
-    --accent: #d97757;
-    --accent-h: #e08b6d;
-    --clay: #3d2c24;
-    --clay-ink: #eba88b;
-    --muted: #34332f;
-    --red: #e8907f;
-    --red-s: #432722;
-    --amber: #ddaa5e;
-    --amber-s: #3d3221;
-    --green: #a3c196;
-    --green-s: #2a3426;
-    --blue: #97b1d8;
-    --blue-s: #25303f;
+    --bg: #0a0d16;
+    --surface: #121726;
+    --line: #222a3c;
+    --ink: #eceff6;
+    --ink2: #8e97ab;
+    --accent: #ff6a35;
+    --accent-h: #ff8150;
+    --accent-top: #ff8a57;
+    --accent-glow: rgb(255 106 53 / 0.28);
+    --clay: #2b1a12;
+    --clay-ink: #ff9e73;
+    --muted: #1a2031;
+    --red: #ff6b6f;
+    --red-s: #351a1e;
+    --amber: #f5b547;
+    --amber-s: #33280f;
+    --green: #3fd09a;
+    --green-s: #0f2a22;
+    --blue: #8aa4ff;
+    --blue-s: #182346;
+    --side: #070a12;
+    --side-2: #111626;
+    --side-line: #1c2334;
+    --side-ink: #eceff6;
+    --side-ink2: #7f889c;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.25);
+    --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 16px 36px rgb(0 0 0 / 0.35);
     --src-call: #3987e5;
     --src-text: #d95926;
     --src-email: #199e70;
@@ -78,6 +98,11 @@
   --color-green-s: var(--green-s);
   --color-blue: var(--blue);
   --color-blue-s: var(--blue-s);
+  --color-side: var(--side);
+  --color-side-2: var(--side-2);
+  --color-side-line: var(--side-line);
+  --color-side-ink: var(--side-ink);
+  --color-side-ink2: var(--side-ink2);
   --font-sans: var(--font-geist), system-ui, sans-serif;
   --font-serif: var(--font-newsreader), Georgia, serif;
 }
@@ -91,8 +116,18 @@ body {
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 16px;
-  box-shadow: 0 1px 2px rgb(20 20 19 / 0.04), 0 6px 16px rgb(20 20 19 / 0.04);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+/* Cards you can open lift slightly on hover. */
+.card-hover {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
 }
 
 .btn-primary {
@@ -101,18 +136,24 @@ body {
   justify-content: center;
   gap: 8px;
   border-radius: 12px;
-  background: var(--accent);
+  background: linear-gradient(180deg, var(--accent-top), var(--accent));
   color: #fff;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), 0 6px 16px var(--accent-glow);
+  transition: filter 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 .btn-primary:hover {
-  background: var(--accent-h);
+  filter: brightness(1.05);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), 0 10px 22px var(--accent-glow);
+}
+.btn-primary:active {
+  transform: translateY(1px);
 }
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: default;
+  box-shadow: none;
 }
 
 .btn-secondary {
@@ -126,16 +167,17 @@ body {
   color: var(--ink);
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
 }
 .btn-secondary:hover {
   background: var(--muted);
+  border-color: color-mix(in srgb, var(--ink2) 30%, var(--line));
 }
 
 .field-label {
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--ink2);
 }

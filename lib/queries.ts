@@ -6,6 +6,7 @@ import { activities, customers, jobs, type Customer, type Job } from "@/db/schem
 import { config } from "./config";
 import { buildDigest } from "./digest";
 import { rankCustomers, summarizeCustomer } from "./customers";
+import { startOfDay } from "./time";
 import { countCalls, getTodayList, isSnoozed } from "./today";
 
 export type JobWithCustomer = Job & { customer: Customer };
@@ -32,10 +33,21 @@ export async function getOpenJobs(): Promise<JobWithCustomer[]> {
 }
 
 export async function getToday(now = new Date()) {
-  const open = await getOpenJobs();
+  const [open, handled] = await Promise.all([getOpenJobs(), handledToday(now)]);
   const groups = getTodayList(open, now, config);
   const snoozed = open.filter((j) => isSnoozed(j, now)).sort((a, b) => a.snoozedUntil!.getTime() - b.snoozedUntil!.getTime());
-  return { groups, snoozed, ...countCalls(groups) };
+  return { groups, snoozed, handled, ...countCalls(groups) };
+}
+
+// Jobs she has already dealt with today (called, texted, quoted, moved...), for the progress bar.
+const HANDLED_TYPES = ["called", "texted", "emailed", "voicemail", "quote_sent", "stage_change"] as const;
+async function handledToday(now: Date): Promise<number> {
+  const d = await db();
+  const rows = await d
+    .selectDistinct({ jobId: activities.jobId })
+    .from(activities)
+    .where(and(inArray(activities.type, [...HANDLED_TYPES]), gte(activities.createdAt, startOfDay(now, config.BUSINESS_TZ))));
+  return rows.length;
 }
 
 export async function getAllJobs(): Promise<JobWithCustomer[]> {

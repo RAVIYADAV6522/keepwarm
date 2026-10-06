@@ -20,10 +20,11 @@ export function Sidebar({ todayCount, openCount, account }: { todayCount: number
   return (
     // The aside stretches with the page so its background always reaches the bottom;
     // the inner column stays pinned while the content scrolls.
-    <aside className="hidden w-[232px] flex-none border-r border-line bg-surface lg:block">
-      <div className="sticky top-0 flex h-dvh flex-col gap-1.5 px-4 py-7">
-        <Link href="/" className="px-3 pb-[22px] font-serif text-[26px]">
-          KeepWarm
+    <aside className="hidden w-[240px] flex-none border-r border-side-line bg-side text-side-ink lg:block">
+      <div className="sticky top-0 flex h-dvh flex-col gap-1 px-4 py-6">
+        <Link href="/" className="mb-6 flex items-center gap-2.5 px-2">
+          <LogoMark />
+          <span className="font-serif text-[24px] tracking-[-0.01em]">KeepWarm</span>
         </Link>
         {items.map((n) => {
           const on = isActive(path, n.href);
@@ -31,25 +32,34 @@ export function Sidebar({ todayCount, openCount, account }: { todayCount: number
             <Link
               key={n.href}
               href={n.href}
-              className={`flex h-11 items-center justify-between rounded-xl px-3.5 text-[15px] ${on ? "bg-clay font-semibold text-clay-ink" : "font-medium text-ink hover:bg-muted"}`}
+              className={`relative flex h-11 items-center justify-between rounded-xl px-3.5 text-[15px] transition-colors ${
+                on ? "bg-side-2 font-semibold text-side-ink" : "font-medium text-side-ink2 hover:bg-side-2/60 hover:text-side-ink"
+              }`}
             >
+              {on && <span className="absolute top-2.5 bottom-2.5 left-0 w-[3px] rounded-full bg-accent" />}
               {n.label}
-              {n.count != null && <span className="text-[13px]">{n.count}</span>}
+              {n.count != null && (
+                <span className={`min-w-6 rounded-full px-2 py-0.5 text-center text-[12px] font-semibold tabular-nums ${on ? "bg-accent text-white" : "bg-side-2 text-side-ink2"}`}>
+                  {n.count}
+                </span>
+              )}
             </Link>
           );
         })}
-        <Link href="/jobs/new" className="btn-primary mt-[18px] h-12 text-[15px]">
+        <Link href="/jobs/new" className="btn-primary mt-5 h-12 text-[15px]">
           <span className="text-[22px] leading-none font-light">+</span> New job
         </Link>
         <div className="mt-auto flex flex-col gap-1">
-          <div className="px-3.5 pb-1 text-[11.5px] font-semibold tracking-[0.06em] text-ink2 uppercase">Tools</div>
+          <div className="px-3.5 pb-1 text-[11px] font-semibold tracking-[0.08em] text-side-ink2 uppercase">Tools</div>
           {TOOLS.map((t) => {
             const on = path === t.href;
             return (
               <Link
                 key={t.href}
                 href={t.href}
-                className={`flex h-10 items-center gap-2.5 rounded-xl px-3.5 text-[14px] ${on ? "bg-clay font-semibold text-clay-ink" : "text-ink2 hover:bg-muted hover:text-ink"}`}
+                className={`flex h-10 items-center gap-2.5 rounded-xl px-3.5 text-[14px] transition-colors ${
+                  on ? "bg-side-2 font-semibold text-side-ink" : "text-side-ink2 hover:bg-side-2/60 hover:text-side-ink"
+                }`}
               >
                 <t.Icon />
                 {t.label}
@@ -70,13 +80,13 @@ const TOOLS = [
 
 function AccountRow({ account }: { account: Account }) {
   return (
-    <div className="mt-3 flex items-center gap-2.5 border-t border-line px-1.5 pt-4">
-      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-clay font-serif text-[17px] text-clay-ink">
+    <div className="mt-3 flex items-center gap-2.5 border-t border-side-line px-1.5 pt-4">
+      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-gradient-to-b from-[var(--accent-top)] to-accent font-serif text-[17px] text-white shadow-[0_4px_12px_var(--accent-glow)]">
         {account.owner.charAt(0)}
       </span>
       <div className="min-w-0 flex-1 leading-tight">
-        <div className="truncate text-[14px] font-semibold">{account.owner}</div>
-        <div className="truncate text-[12px] text-ink2">{account.business}</div>
+        <div className="truncate text-[14px] font-semibold text-side-ink">{account.owner}</div>
+        <div className="truncate text-[12px] text-side-ink2">{account.business}</div>
       </div>
       {account.canLogout && (
         <form action={logout}>
@@ -84,7 +94,7 @@ function AccountRow({ account }: { account: Account }) {
             type="submit"
             title="Log out"
             aria-label="Log out"
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-ink2 hover:bg-muted hover:text-ink"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-side-ink2 hover:bg-side-2 hover:text-side-ink"
           >
             <LogoutIcon />
           </button>
@@ -150,6 +160,22 @@ function BoltIcon() {
   );
 }
 
+// Ember tile with a flame: the KeepWarm mark (same as app/icon.svg).
+export function LogoMark({ size = 30 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" className="flex-none drop-shadow-[0_4px_10px_var(--accent-glow)]">
+      <defs>
+        <linearGradient id="kw-ember" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#FF7A45" />
+          <stop offset="1" stopColor="#E8501F" />
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="16" fill="url(#kw-ember)" />
+      <path d="M32 14c-6 9-12 14-12 23a12 12 0 0 0 24 0c0-5-2-8-5-12-1 4-3 6-5 7 1-6 0-12-2-18Z" fill="#fff" />
+    </svg>
+  );
+}
+
 function PeopleIcon() {
   return (
     <svg {...iconProps}>
@@ -183,14 +209,14 @@ export function BottomBar() {
     );
   };
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 grid h-[84px] grid-cols-4 items-start border-t border-line bg-surface pt-2 pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-20 grid h-[84px] grid-cols-4 items-start border-t border-line bg-surface/85 pt-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
       {tab("/", "Today")}
       {tab("/jobs", "All jobs")}
       <div className="flex justify-center">
         <Link
           href="/jobs/new"
           aria-label="New job"
-          className="-mt-[22px] flex h-[60px] w-[60px] items-center justify-center rounded-full bg-accent text-[32px] leading-none font-light text-white shadow-[0_6px_18px_rgba(217,119,87,.4),0_0_0_5px_var(--bg)]"
+          className="-mt-[22px] flex h-[60px] w-[60px] items-center justify-center rounded-full bg-gradient-to-b from-[var(--accent-top)] to-accent text-[32px] leading-none font-light text-white shadow-[0_8px_20px_var(--accent-glow),0_0_0_5px_var(--bg)]"
         >
           +
         </Link>

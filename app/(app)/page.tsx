@@ -9,7 +9,9 @@ import { toCardJob } from "@/lib/view";
 
 export default async function TodayPage() {
   const now = new Date();
-  const { groups, snoozed, calls, quotes } = await getToday(now);
+  const { groups, snoozed, handled, calls, quotes } = await getToday(now);
+  const toGo = calls + quotes;
+  const progress = handled + toGo ? Math.round((handled / (handled + toGo)) * 100) : 0;
   const tz = config.BUSINESS_TZ;
   const hour = hourIn(now, tz);
   const greeting = `Good ${hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"}, ${OWNER_NAME}`;
@@ -27,6 +29,21 @@ export default async function TodayPage() {
         </div>
         {summary && <div className="rounded-full bg-clay px-[15px] py-[9px] text-[15px] font-semibold text-clay-ink">{summary}</div>}
       </div>
+
+      {handled + toGo > 0 && (
+        <div className="card flex flex-col gap-3 px-4 py-3.5">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-[15px] font-semibold">Today&apos;s progress</span>
+            <span className="text-sm text-ink2">
+              <span className="font-semibold text-ink tabular-nums">{handled}</span> handled ·{" "}
+              <span className="font-semibold text-ink tabular-nums">{toGo}</span> to go
+            </span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Today's progress">
+            <div className="h-full rounded-full bg-gradient-to-r from-[var(--accent-top)] to-accent transition-[width] duration-500" style={{ width: `${Math.max(progress, handled ? 4 : 0)}%` }} />
+          </div>
+        </div>
+      )}
 
       {groups.length === 0 && (
         <div className="flex flex-col items-center gap-3.5 py-[72px] text-center">

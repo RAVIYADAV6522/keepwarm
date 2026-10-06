@@ -83,7 +83,7 @@ export function JobsBoard({ jobs }: { jobs: BoardJob[] }) {
                   <span className="text-[13px] text-ink2">{list.length}</span>
                 </div>
                 {visible(s).map((j) => (
-                  <Link key={j.id} href={`/jobs/${j.id}`} className="flex flex-col gap-1.5 rounded-xl border border-line bg-surface px-3.5 py-3 shadow-[0_1px_2px_rgba(20,20,19,.04)] hover:border-accent">
+                  <Link key={j.id} href={`/jobs/${j.id}`} className="card-hover flex flex-col gap-1.5 rounded-xl border border-line bg-surface px-3.5 py-3 shadow-[var(--shadow)]">
                     <span className="text-[15px] font-semibold">{j.name}</span>
                     <span className="text-[13.5px] leading-snug text-ink2">{j.problem}</span>
                     <div className="mt-0.5 flex flex-wrap items-center justify-between gap-1.5">

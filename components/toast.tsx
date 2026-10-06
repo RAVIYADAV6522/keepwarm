@@ -28,9 +28,9 @@ export function Toaster() {
   return (
     <div
       role="status"
-      className="fixed left-1/2 bottom-[104px] lg:bottom-8 z-50 flex h-14 w-[calc(100%-40px)] max-w-[440px] -translate-x-1/2 items-center gap-2.5 rounded-[14px] bg-[#141413] px-[18px] text-[15px] font-medium text-[#FAF9F5] shadow-[0_10px_30px_rgba(20,20,19,.25)]"
+      className="fixed left-1/2 bottom-[104px] lg:bottom-8 z-50 flex h-14 w-[calc(100%-40px)] max-w-[440px] -translate-x-1/2 items-center gap-2.5 rounded-[14px] border border-white/10 bg-[#0e1220] px-[18px] text-[15px] font-medium text-[#eef1f8] shadow-[0_14px_36px_rgba(14,18,32,.35)]"
     >
-      <span className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full bg-[#5A7D4F] text-xs text-white">✓</span>
+      <span className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full bg-[#10b981] text-xs text-white">✓</span>
       <span className="truncate">{message}</span>
     </div>
   );
