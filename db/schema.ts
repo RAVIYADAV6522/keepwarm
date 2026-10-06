@@ -72,6 +72,14 @@ export const inboundLog = pgTable("inbound_log", {
   createdAt: ts("created_at").notNull().defaultNow(),
 });
 
+// Read-only links to the Numbers page ("send it to my husband"). Only one is active at a time.
+export const shareLinks = pgTable("share_links", {
+  id: serial("id").primaryKey(),
+  token: text("token").notNull().unique(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  revokedAt: ts("revoked_at"),
+});
+
 export type Customer = typeof customers.$inferSelect;
 export type Job = typeof jobs.$inferSelect;
 export type Activity = typeof activities.$inferSelect;

@@ -30,7 +30,7 @@ The first customer runs a commercial refrigeration repair company (walk-in coole
 | Many requests are repeat customers | Customers matched by phone number; replies attach to the open job instead of duplicating it |
 | The lost Friday freezer job | Emergency alert the moment a "freezer down" request arrives |
 | "If I had that list every morning" | Daily morning email with the same list |
-| "My husband keeps asking me for numbers" | **Numbers**: open jobs, money waiting on a yes, won and lost this month, leads by source |
+| "My husband keeps asking me for numbers" | **Numbers**: open jobs, money waiting on a yes, won and lost this month, leads by source, and a read-only link she can text him |
 | She works from her phone in the field | Mobile-first layout with large tap targets |
 
 ## Key decisions

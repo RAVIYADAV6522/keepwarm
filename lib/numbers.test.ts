@@ -12,10 +12,21 @@ const row = (o: Partial<Parameters<typeof getNumbers>[0][number]>) => ({
   closedAt: null,
   contactAttempts: 0,
   lastContactAt: null,
+  lostReason: null,
   ...o,
 });
 
 describe("getNumbers", () => {
+  it("groups this month's lost jobs by reason, most common first", () => {
+    const lost = (lostReason: string | null) => row({ stage: "lost", lostReason, closedAt: new Date(NOW.getTime() - DAY) });
+    const n = getNumbers([lost("Went with someone else"), lost("Too expensive"), lost("Went with someone else"), lost(null)], NOW, TZ);
+    expect(n.lostReasons).toEqual([
+      { reason: "Went with someone else", count: 2 },
+      { reason: "Too expensive", count: 1 },
+      { reason: "No reason given", count: 1 },
+    ]);
+  });
+
   it("counts open, waiting, won and lost", () => {
     const n = getNumbers(
       [

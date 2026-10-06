@@ -6,7 +6,7 @@ import { startOfDay, startOfMonth, startOfWeek } from "./time";
 // "My husband keeps asking me for numbers and I cannot even tell him how many open jobs we have."
 // Plain counts over the jobs table — pure, so it's easy to test and to trust.
 
-type Row = Pick<Job, "stage" | "source" | "quoteAmount" | "createdAt" | "closedAt" | "contactAttempts" | "lastContactAt">;
+type Row = Pick<Job, "stage" | "source" | "quoteAmount" | "createdAt" | "closedAt" | "contactAttempts" | "lastContactAt" | "lostReason">;
 
 export type WeekBar = { label: string; start: Date; total: number; bySource: Record<Source, number> };
 
@@ -52,6 +52,16 @@ export function getNumbers(rows: Row[], now: Date, tz: string, weeks = 6) {
     wonCents: sum(won),
     lostCount: lost.length,
     lostCents: sum(lost),
+    // "Why did we lose them?" — most common reason first.
+    lostReasons: Object.entries(
+      lost.reduce<Record<string, number>>((acc, r) => {
+        const why = r.lostReason?.trim() || "No reason given";
+        acc[why] = (acc[why] ?? 0) + 1;
+        return acc;
+      }, {}),
+    )
+      .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count),
     bars,
   };
 }

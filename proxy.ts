@@ -2,8 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { AUTH_COOKIE, passcodeToken } from "@/lib/auth";
 
 // Passcode gate. Off when APP_PASSCODE is unset (local dev).
-// Public: the contact form, the inbound webhooks (they check their own token) and the cron route (CRON_SECRET).
-const PUBLIC = [/^\/login/, /^\/contact/, /^\/api\/inbound\//, /^\/api\/cron\//];
+// Public: the contact form, read-only share links (they check their own token), the inbound webhooks
+// (they check their own token) and the cron route (CRON_SECRET).
+const PUBLIC = [/^\/login/, /^\/contact/, /^\/share\//, /^\/api\/inbound\//, /^\/api\/cron\//];
 
 export async function proxy(req: NextRequest) {
   const passcode = process.env.APP_PASSCODE;

@@ -14,6 +14,7 @@ import { DEMO_SAMPLES, type DemoKind } from "@/lib/demo-samples";
 import { matchCustomer } from "@/lib/match";
 import { sendEmergencyAlert } from "@/lib/notify";
 import { seed } from "@/lib/seed";
+import { createShare, revokeShare } from "@/lib/share";
 import { dollarsToCents } from "@/lib/format";
 import { formatDate, fromDateInput } from "@/lib/time";
 
@@ -60,6 +61,17 @@ export async function snoozeAction(jobId: number, choice: SnoozeOption | { date:
 export async function wakeAction(jobId: number) {
   await wake(await getDb(), jobId);
   refresh();
+}
+
+export async function createShareAction() {
+  const token = await createShare(await getDb());
+  revalidatePath("/numbers");
+  return token;
+}
+
+export async function revokeShareAction() {
+  await revokeShare(await getDb());
+  revalidatePath("/numbers");
 }
 
 export async function setVisitAction(jobId: number, date: string) {
