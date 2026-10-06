@@ -1,26 +1,134 @@
 @import "tailwindcss";
 
+/* Design tokens from design/Callback_App.html. Colour is only used for meaning:
+   red = emergency, amber = waiting on them, green = won/done, blue = scheduled, clay = new. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #faf9f5;
+  --surface: #ffffff;
+  --line: #e8e6dc;
+  --ink: #141413;
+  --ink2: #6b6a65;
+  --accent: #d97757;
+  --accent-h: #c15f3c;
+  --clay: #f5e6dd;
+  --clay-ink: #a9502f;
+  --muted: #f3f1ea;
+  --red: #b53d2e;
+  --red-s: #f8e1dc;
+  --amber: #b7791f;
+  --amber-s: #fbf0d9;
+  --green: #5a7d4f;
+  --green-s: #e6efe1;
+  --blue: #4a6fa5;
+  --blue-s: #e3eaf4;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #1f1e1d;
+    --surface: #2a2928;
+    --line: #3a3936;
+    --ink: #f0eee6;
+    --ink2: #a9a79f;
+    --accent: #d97757;
+    --accent-h: #e08b6d;
+    --clay: #3d2c24;
+    --clay-ink: #eba88b;
+    --muted: #34332f;
+    --red: #e8907f;
+    --red-s: #432722;
+    --amber: #ddaa5e;
+    --amber-s: #3d3221;
+    --green: #a3c196;
+    --green-s: #2a3426;
+    --blue: #97b1d8;
+    --blue-s: #25303f;
+    color-scheme: dark;
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink2);
+  --color-accent: var(--accent);
+  --color-accent-h: var(--accent-h);
+  --color-clay: var(--clay);
+  --color-clay-ink: var(--clay-ink);
+  --color-muted: var(--muted);
+  --color-red: var(--red);
+  --color-red-s: var(--red-s);
+  --color-amber: var(--amber);
+  --color-amber-s: var(--amber-s);
+  --color-green: var(--green);
+  --color-green-s: var(--green-s);
+  --color-blue: var(--blue);
+  --color-blue-s: var(--blue-s);
+  --font-sans: var(--font-geist), system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgb(20 20 19 / 0.04), 0 6px 16px rgb(20 20 19 / 0.04);
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-primary:hover {
+  background: var(--accent-h);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-secondary:hover {
+  background: var(--muted);
+}
+
+.field-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
 }
