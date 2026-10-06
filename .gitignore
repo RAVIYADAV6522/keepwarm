@@ -45,5 +45,7 @@ next-env.d.ts
 /.pglite-test
 !.env.example
 
-# local AI assistant notes
+# local notes and design references (not part of the app)
 CLAUDE.md
+AGENTS.md
+/design/

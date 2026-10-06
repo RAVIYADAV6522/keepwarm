@@ -6,6 +6,12 @@ Job requests arrive by phone, text, email, website form and a paper notebook. Ke
 
 **Live demo:** [keepwarm.vercel.app](https://keepwarm.vercel.app) (the passcode is filled in on the sign-in page). Use **Simulate leads** in the sidebar to send in a web form, email, customer text or missed call and watch it show up on Today.
 
+![Today screen](docs/screenshots/today.png)
+
+| All jobs | Numbers (dark mode) | On a phone |
+|---|---|---|
+| ![All jobs board](docs/screenshots/jobs.png) | ![Numbers](docs/screenshots/numbers.png) | ![Today on a phone](docs/screenshots/today-mobile.png) |
+
 ---
 
 ## Features

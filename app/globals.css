@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Design tokens from design/Callback_App.html. Colour is only used for meaning:
+/* Design tokens. Colour is only used for meaning:
    red = emergency, amber = waiting on them, green = won/done, blue = scheduled, clay = new. */
 :root {
   --bg: #faf9f5;
