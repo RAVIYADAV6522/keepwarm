@@ -44,3 +44,6 @@ next-env.d.ts
 /.pglite
 /.pglite-test
 !.env.example
+
+# local AI assistant notes
+CLAUDE.md
