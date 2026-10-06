@@ -1,3 +1,4 @@
+import { EmailPreview } from "@/components/EmailPreview";
 import { getDigest } from "@/lib/queries";
 
 export default async function DigestPage() {
@@ -16,7 +17,7 @@ export default async function DigestPage() {
         <div className="border-b border-line px-4 py-3 text-sm">
           <span className="text-ink2">Subject:</span> <span className="font-medium">{digest.subject}</span>
         </div>
-        <iframe title="Morning email preview" srcDoc={digest.html} className="h-[900px] w-full border-0 bg-[#F4F5F8]" />
+        <EmailPreview html={digest.html} />
       </div>
     </div>
   );

@@ -9,7 +9,8 @@ import { pendingCount } from "@/lib/mailbox";
 import { formatDate, hourIn } from "@/lib/time";
 import { toCardJob } from "@/lib/view";
 
-export default async function TodayPage() {
+export default async function TodayPage({ searchParams }: PageProps<"/">) {
+  const { from } = await searchParams;
   const now = new Date();
   const [{ groups, snoozed, handled, calls, quotes }, inbox] = await Promise.all([getToday(), getDb().then(pendingCount)]);
   const toGo = calls + quotes;
@@ -31,6 +32,12 @@ export default async function TodayPage() {
         </div>
         {summary && <div className="rounded-full bg-clay px-[15px] py-[9px] text-[15px] font-semibold text-clay-ink">{summary}</div>}
       </div>
+
+      {from === "contact" && (
+        <div className="rounded-[14px] bg-green-s px-4 py-3 text-[15px] text-green">
+          Your contact form request just arrived. It&apos;s on the list below, waiting for a call back.
+        </div>
+      )}
 
       {inbox > 0 && (
         <Link href="/inbox" className="card card-hover flex items-center justify-between gap-3 px-4 py-3.5">

@@ -57,6 +57,13 @@ describe("processEmail", () => {
     expect(await processEmail(db, form, NOW)).toBe("pending");
   });
 
+  it("newsletters, calendar invites and everyday mail are skipped, even with alarming words", async () => {
+    const newsletter = mail({ fromEmail: "news@superintelligence.ai", subject: "China is now just 3% behind", text: "The US lead is down to 3%. Urgent read. Plus: who builds the next freezer of compute?", bulk: true });
+    const invite = mail({ fromEmail: "pat@school.edu", subject: "Invitation: Assignment review @ Tue 4:30pm", text: "Join the review. Calendar invitation.", calendar: true });
+    const chat = mail({ fromEmail: "friend@gmail.com", subject: "Lunch?", text: "Server is down again lol, lunch at 1?" });
+    for (const m of [newsletter, invite, chat]) expect(await processEmail(db, m, NOW)).toBe("ignored");
+  });
+
   it("the same email is never processed twice", async () => {
     const m = mail({ fromEmail: "x@y.com", subject: "Cooler", text: "Reach-in cooler is noisy, can you quote a repair? 708-555-0101" });
     expect(await processEmail(db, m, NOW)).toBe("pending");

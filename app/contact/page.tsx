@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { BUSINESS_NAME } from "@/lib/config";
+import { isSignedIn } from "@/lib/session";
 
 export const metadata = { title: `Contact · ${BUSINESS_NAME}` };
 
@@ -6,8 +8,15 @@ export const metadata = { title: `Contact · ${BUSINESS_NAME}` };
 // that posts to the same webhook her real site would.
 export default async function ContactPage({ searchParams }: PageProps<"/contact">) {
   const { sent } = await searchParams;
+  // Customers never see a way into the app; Denise (signed in, trying the demo) gets a way back.
+  const owner = await isSignedIn();
   return (
     <div className="mx-auto flex min-h-dvh max-w-[520px] flex-col gap-6 px-5 py-10">
+      {owner && (
+        <Link href="/" className="-mb-2 -ml-1.5 flex h-11 w-fit items-center gap-1 text-base font-medium text-clay-ink">
+          <span className="text-2xl leading-none">‹</span> Back to KeepWarm
+        </Link>
+      )}
       <div className="flex flex-col gap-2">
         <div className="text-sm font-semibold tracking-[0.06em] text-clay-ink uppercase">{BUSINESS_NAME}</div>
         <h1 className="font-serif text-[36px] leading-tight">Commercial refrigeration repair</h1>

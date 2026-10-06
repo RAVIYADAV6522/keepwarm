@@ -73,9 +73,23 @@ export async function getMessage(token: string, id: string): Promise<MailMessage
 
 type GmailPart = { mimeType?: string; body?: { data?: string }; parts?: GmailPart[]; headers?: { name: string; value: string }[] };
 export type GmailMessage = { id: string; internalDate?: string; payload?: GmailPart };
-export type MailMessage = { id: string; fromName: string | null; fromEmail: string | null; subject: string; receivedAt: Date; text: string };
+export type MailMessage = {
+  id: string;
+  fromName: string | null;
+  fromEmail: string | null;
+  subject: string;
+  receivedAt: Date;
+  text: string;
+  bulk?: boolean; // newsletters and mailing lists (List-Unsubscribe / List-Id / Precedence: bulk)
+  calendar?: boolean; // meeting invitations and replies
+};
 
 const decode = (data: string) => Buffer.from(data.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+
+function hasPart(part: GmailPart | undefined, type: string): boolean {
+  if (!part) return false;
+  return part.mimeType === type || (part.parts ?? []).some((p) => hasPart(p, type));
+}
 
 function findPart(part: GmailPart | undefined, type: string): string | null {
   if (!part) return null;
@@ -126,11 +140,14 @@ export function parseMessage(msg: GmailMessage): MailMessage {
   const plain = findPart(msg.payload, "text/plain");
   const html = plain ? null : findPart(msg.payload, "text/html");
   const from = parseFrom(header("from"));
+  const subject = header("subject");
   return {
     id: msg.id,
     fromName: from.name,
     fromEmail: from.email,
-    subject: header("subject"),
+    subject,
+    bulk: !!header("list-unsubscribe") || !!header("list-id") || /^(bulk|list|junk)$/i.test(header("precedence")),
+    calendar: hasPart(msg.payload, "text/calendar") || /^(updated )?invitation:|^(accepted|declined|tentative|canceled event|cancelled event):/i.test(subject),
     receivedAt: msg.internalDate ? new Date(Number(msg.internalDate)) : new Date(),
     text: stripQuoted(plain ?? (html ? htmlToText(html) : "")).slice(0, 10_000),
   };

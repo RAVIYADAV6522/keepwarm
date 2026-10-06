@@ -25,6 +25,13 @@ describe("parseMessage", () => {
     expect(m.receivedAt).toEqual(new Date(1791300000000));
   });
 
+  it("flags newsletters and calendar invites", () => {
+    const news = parseMessage({ id: "n", payload: { mimeType: "text/plain", headers: [{ name: "List-Unsubscribe", value: "<mailto:x@y.com>" }], body: { data: b64("hi") } } });
+    const invite = parseMessage({ id: "i", payload: { mimeType: "multipart/mixed", headers: [{ name: "Subject", value: "Updated invitation: Demo" }], parts: [{ mimeType: "text/calendar" }] } });
+    const normal = parseMessage({ id: "p", payload: { mimeType: "text/plain", headers: [{ name: "Subject", value: "Freezer down" }], body: { data: b64("help") } } });
+    expect([news.bulk, invite.calendar, normal.bulk, normal.calendar]).toEqual([true, true, false, false]);
+  });
+
   it("falls back to HTML when there is no plain text", () => {
     const m = parseMessage({ id: "x", payload: { mimeType: "text/html", headers: [], body: { data: b64("<div>Freezer down!<br>Call 312-555-0142</div><style>p{}</style>") } } });
     expect(m.text).toBe("Freezer down!\nCall 312-555-0142");

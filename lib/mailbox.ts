@@ -13,8 +13,6 @@ import { normalizePhone } from "./phone";
 //   - looks like a job enquiry                -> "pending" in the Inbox, fields filled in, she reviews
 //   - anything else (newsletters, receipts)   -> skipped; only the Gmail id is kept, never the content
 
-const AUTOMATED_RE = /(?:^|[.+_-])(?:no-?reply|donotreply|do-not-reply|notifications?|mailer-daemon|alerts?|updates?|news(?:letter)?)(?:[.+_-]|@)/i;
-
 export type ProcessOutcome = "pending" | "auto" | "ignored" | "duplicate";
 
 export function emailText(m: Pick<MailMessage, "fromName" | "fromEmail" | "subject" | "text">): string {
@@ -28,9 +26,12 @@ export async function processEmail(db: Db, m: MailMessage, now = new Date()): Pr
 
   const raw = emailText(m);
   const extracted = await extract(raw, "email");
-  // Notifications from no-reply addresses (Search Console, banks, apps) aren't enquiries unless they're
-  // clearly about refrigeration work — website contact forms often come from no-reply senders too.
-  if (AUTOMATED_RE.test(m.fromEmail ?? "") && !REPAIR_RE.test(`${m.subject}\n${m.text}`)) extracted.is_job_request = false;
+  // A real inbox is mostly not enquiries. Something only counts as one if it's about refrigeration work
+  // and isn't a newsletter or a calendar invite. (Replies from a customer with an
+  // open job are handled below regardless — they're attached to that job.)
+  // (Website forms sent from a no-reply address still get through: they're about the work.)
+  const aboutTheWork = REPAIR_RE.test(`${m.subject}\n${m.text}`);
+  if (!aboutTheWork || m.bulk || m.calendar) extracted.is_job_request = false;
   const email = extracted.email ?? m.fromEmail;
   const customer = await findCustomer(db, normalizePhone(extracted.phone), email);
   const openJob = customer ? await findOpenJob(db, customer.id) : null;

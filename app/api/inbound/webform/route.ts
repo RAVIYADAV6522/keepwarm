@@ -1,5 +1,6 @@
 import { pick, readBody, runIntake, summary, tokenOk } from "@/lib/inbound";
 import { normalizePhone } from "@/lib/phone";
+import { isSignedIn } from "@/lib/session";
 
 // Door 1: the website contact form. Public, so it's protected by a honeypot instead of a token.
 export async function POST(req: Request) {
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
   ].join("\n");
 
   // The form already separates the fields — trust them over extraction where they're filled in.
+  const owner = isHtmlForm && (await isSignedIn());
   const result = await runIntake(raw, "web_form", {
     overrides: Object.fromEntries(
       Object.entries({
@@ -38,6 +40,8 @@ export async function POST(req: Request) {
   // The public gets a plain "thanks". Only the in-app simulator (which carries the inbound token) sees
   // the details, so the form can't be used to check who is a customer.
   const internal = !!process.env.INBOUND_TOKEN && tokenOk(req);
+  // Signed in (trying the demo form): go straight to Today, where the new request is waiting.
+  if (owner) return Response.redirect(new URL("/?from=contact", req.url), 303);
   return done(req, isHtmlForm, internal ? summary(result) : { ok: true });
 }
 
