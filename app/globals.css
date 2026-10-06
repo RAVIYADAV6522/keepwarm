@@ -21,6 +21,12 @@
   --green-s: #e6efe1;
   --blue: #4a6fa5;
   --blue-s: #e3eaf4;
+  /* Lead sources in the Numbers chart: fixed categorical order, validated for colour-blind separation. */
+  --src-call: #2a78d6;
+  --src-text: #eb6834;
+  --src-email: #1baf7a;
+  --src-web: #eda100;
+  --src-notebook: #e87ba4;
   color-scheme: light;
 }
 
@@ -44,6 +50,11 @@
     --green-s: #2a3426;
     --blue: #97b1d8;
     --blue-s: #25303f;
+    --src-call: #3987e5;
+    --src-text: #d95926;
+    --src-email: #199e70;
+    --src-web: #c98500;
+    --src-notebook: #d55181;
     color-scheme: dark;
   }
 }

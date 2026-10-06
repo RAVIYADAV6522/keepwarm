@@ -112,3 +112,15 @@ export function tomorrowMorning(now: Date, tz: string): Date {
   const p = parts(new Date(startOfDay(now, tz).getTime() + 36 * 3_600_000), tz);
   return zonedTime(p.y, p.m, p.d, 9, 0, tz);
 }
+
+// Monday 00:00 of the week containing `date`, in the zone.
+export function startOfWeek(date: Date, tz: string): Date {
+  const day = new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "short" }).format(date);
+  const back = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(day);
+  return startOfDay(new Date(startOfDay(date, tz).getTime() - back * DAY + 12 * 3_600_000), tz);
+}
+
+export function startOfMonth(date: Date, tz: string): Date {
+  const p = parts(date, tz);
+  return zonedTime(p.y, p.m, 1, 0, 0, tz);
+}
