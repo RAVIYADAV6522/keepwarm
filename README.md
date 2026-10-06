@@ -4,7 +4,7 @@
 
 Job requests arrive by phone, text, email, website form and a paper notebook. KeepWarm puts them all in one list, tracks where each job stands, and shows the owner one thing each morning: **who to call today**. A job stays on that list until it is done or lost, so no request goes cold because it was forgotten.
 
-**Live demo:** [keepwarm-m3lg.vercel.app](https://keepwarm-m3lg.vercel.app) (the passcode is filled in on the sign-in page). Use **Simulate leads** in the sidebar to send in a web form, email, customer text or missed call and watch it show up on Today.
+**Live demo:** [keepwarm.vercel.app](https://keepwarm.vercel.app) (the passcode is filled in on the sign-in page). Use **Simulate leads** in the sidebar to send in a web form, email, customer text or missed call and watch it show up on Today.
 
 ---
 
