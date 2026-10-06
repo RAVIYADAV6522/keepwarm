@@ -22,6 +22,10 @@ export type Source = (typeof SOURCES)[number];
 export type Stage = (typeof STAGES)[number];
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
+export const SNOOZE_OPTIONS = ["tomorrow", "monday", "next_week"] as const;
+export type SnoozeOption = (typeof SNOOZE_OPTIONS)[number];
+export const SNOOZE_LABEL: Record<SnoozeOption, string> = { tomorrow: "Tomorrow", monday: "Monday", next_week: "In a week" };
+
 export const LOG_KINDS = ["talked", "voicemail", "texted", "emailed", "quote_sent", "said_yes"] as const;
 export type LogKind = (typeof LOG_KINDS)[number];
 

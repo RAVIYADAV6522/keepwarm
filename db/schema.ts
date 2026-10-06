@@ -40,6 +40,8 @@ export const jobs = pgTable("jobs", {
   // When the customer last reached out to us (inbound text/email on an open job).
   lastInboundAt: ts("last_inbound_at"),
   nextFollowUpAt: ts("next_follow_up_at"),
+  // "Remind me Monday": hidden from Today until then.
+  snoozedUntil: ts("snoozed_until"),
   contactAttempts: integer("contact_attempts").notNull().default(0),
   rawInput: text("raw_input"),
   autoAdded: boolean("auto_added").notNull().default(false),

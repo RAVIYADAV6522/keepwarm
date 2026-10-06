@@ -2,9 +2,9 @@ import { eq } from "drizzle-orm";
 import type { Db } from "@/db";
 import { activities, jobs, type ActivityType, type Job, type Stage, type Urgency } from "@/db/schema";
 import { config } from "./config";
-import { LOG_LABEL, type LogKind } from "./constants";
+import { LOG_LABEL, type LogKind, type SnoozeOption } from "./constants";
 import { money, STAGE_LABEL } from "./format";
-import { endOfDay, tomorrowMorning } from "./time";
+import { endOfDay, formatDate, morningIn, nextMondayMorning, tomorrowMorning } from "./time";
 
 // Every state change to a job goes through here, so the rules live in one file.
 
@@ -36,7 +36,7 @@ export async function logContact(
 ) {
   const job = await load(db, jobId);
   const tz = config.BUSINESS_TZ;
-  const patch: Partial<Job> = { lastContactAt: now, updatedAt: now };
+  const patch: Partial<Job> = { lastContactAt: now, updatedAt: now, snoozedUntil: null };
 
   // Contacting them takes care of a follow-up that was due today.
   if (job.nextFollowUpAt && job.nextFollowUpAt <= endOfDay(now, tz)) patch.nextFollowUpAt = null;
@@ -91,6 +91,7 @@ export async function moveStage(
     updatedAt: now,
     closedAt: closing ? now : null,
     lostReason: stage === "lost" ? opts.lostReason?.trim() || null : null,
+    snoozedUntil: null,
   };
   if (closing) patch.nextFollowUpAt = null;
   if (stage === "said_yes") patch.contactAttempts = 0;
@@ -115,7 +116,26 @@ export async function updateJob(
   },
   now = new Date(),
 ) {
-  await db.update(jobs).set({ ...fields, updatedAt: now }).where(eq(jobs.id, jobId));
+  // Picking a follow-up date by hand replaces any snooze.
+  const snooze = fields.nextFollowUpAt !== undefined ? { snoozedUntil: null } : {};
+  await db.update(jobs).set({ ...fields, ...snooze, updatedAt: now }).where(eq(jobs.id, jobId));
+}
+
+export function snoozeTarget(option: SnoozeOption, now: Date, tz = config.BUSINESS_TZ): Date {
+  if (option === "tomorrow") return tomorrowMorning(now, tz);
+  if (option === "monday") return nextMondayMorning(now, tz);
+  return morningIn(7, now, tz);
+}
+
+// "Remind me Monday": off Today until then, back at the top as a follow-up on the day.
+export async function snooze(db: Db, jobId: number, until: Date, now = new Date()) {
+  await db.update(jobs).set({ snoozedUntil: until, nextFollowUpAt: until, updatedAt: now }).where(eq(jobs.id, jobId));
+  await addActivity(db, jobId, "note", `Snoozed until ${formatDate(until, config.BUSINESS_TZ)}`, now);
+}
+
+export async function wake(db: Db, jobId: number, now = new Date()) {
+  await db.update(jobs).set({ snoozedUntil: null, nextFollowUpAt: now, updatedAt: now }).where(eq(jobs.id, jobId));
+  await addActivity(db, jobId, "note", "Snooze cancelled", now);
 }
 
 export async function addNote(db: Db, jobId: number, note: string, now = new Date()) {

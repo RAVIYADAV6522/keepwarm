@@ -4,6 +4,7 @@ import type { Db } from "@/db";
 import { activities, customers, inboundLog, jobs } from "@/db/schema";
 import { testDb } from "@/test/db";
 import { intake } from "./intake";
+import { snooze } from "./jobs";
 import { seed } from "./seed";
 import { getTodayList } from "./today";
 
@@ -39,6 +40,17 @@ describe("intake", () => {
     expect(log.at(-1)?.type).toBe("inbound_message");
     const [group] = getTodayList([job], NOW);
     expect(group.items[0].reason).toBe("They messaged just now");
+  });
+
+  it("a message from a customer wakes a snoozed job", async () => {
+    const marco = await customerByPhone("+13125550125");
+    const [open] = await db.select().from(jobs).where(eq(jobs.customerId, marco.id));
+    await snooze(db, open.id, new Date(NOW.getTime() + 5 * 86_400_000), NOW);
+    const r = await intake(db, "Text from +13125550125:\nany update on that quote?", "text", { overrides: { phone: "+13125550125" } }, NOW);
+    expect(r.outcome).toBe("attached");
+    const [job] = await db.select().from(jobs).where(eq(jobs.id, open.id));
+    expect(job.snoozedUntil).toBeNull();
+    expect(getTodayList([job], NOW)[0].items[0].reason).toBe("They messaged just now");
   });
 
   it("a new emergency from a customer whose open job is routine gets its own job", async () => {

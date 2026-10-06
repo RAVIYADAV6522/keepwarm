@@ -24,6 +24,7 @@ The first customer runs a commercial refrigeration repair company (walk-in coole
 | "Has not heard from us in two days" | Open jobs with no contact for 2 days return to Today automatically |
 | "Waiting on quote, waiting on their yes, scheduled, done. That is it." | Six stages in her own words, one tap to move |
 | "Did I send the quote? Did they say yes?" | Two-tap contact logging, opened automatically after a call or text |
+| "Call me next week" requests that would otherwise nag daily | Snooze until a chosen day; a message from the customer ends it early |
 | Following up takes time she does not have | Ready-to-send texts for each stage, sent from her own phone |
 | Requests arrive in five places | One intake pipeline behind the web form, email, SMS and missed-call webhooks, plus quick add |
 | Many requests are repeat customers | Customers matched by phone number; replies attach to the open job instead of duplicating it |

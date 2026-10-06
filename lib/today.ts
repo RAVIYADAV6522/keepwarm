@@ -13,6 +13,7 @@ export type TodayJobFields = Pick<
   | "source"
   | "contactAttempts"
   | "nextFollowUpAt"
+  | "snoozedUntil"
   | "quoteSentAt"
   | "quoteAmount"
   | "lastContactAt"
@@ -73,7 +74,9 @@ export function getTodayList<T extends TodayJobFields>(
       reason: (j) =>
         j.lastInboundAt && j.lastInboundAt >= (j.lastContactAt ?? j.createdAt)
           ? `They messaged ${ago(j.lastInboundAt)}`
-          : `Follow-up due ${relativeDay(j.nextFollowUpAt!, now, tz)}`,
+          : j.snoozedUntil
+            ? `Reminder you set for ${relativeDay(j.snoozedUntil, now, tz)}`
+            : `Follow-up due ${relativeDay(j.nextFollowUpAt!, now, tz)}`,
       sort: (a, b) => t(a.nextFollowUpAt) - t(b.nextFollowUpAt),
     },
     {
@@ -117,7 +120,8 @@ export function getTodayList<T extends TodayJobFields>(
     },
   ];
 
-  const open = jobs.filter((j) => j.stage !== "done" && j.stage !== "lost");
+  // Snoozed jobs stay off the list until the day she picked.
+  const open = jobs.filter((j) => j.stage !== "done" && j.stage !== "lost" && !isSnoozed(j, now));
   const placed = new Set<T>();
 
   return rules
@@ -136,6 +140,10 @@ export function getTodayList<T extends TodayJobFields>(
       };
     })
     .filter((g) => g.items.length > 0);
+}
+
+export function isSnoozed(j: Pick<Job, "snoozedUntil">, now: Date): boolean {
+  return !!j.snoozedUntil && j.snoozedUntil > now;
 }
 
 // "Quotes you owe" are writing, not calling — the header counts the rest.

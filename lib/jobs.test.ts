@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { Db } from "@/db";
 import { activities, customers, jobs } from "@/db/schema";
 import { testDb } from "@/test/db";
-import { logContact, moveStage } from "./jobs";
+import { logContact, moveStage, snooze, snoozeTarget, wake } from "./jobs";
 
 const NOW = new Date("2026-10-06T14:00:00Z"); // 9:00 Chicago
 let db: Db;
@@ -59,6 +59,40 @@ describe("logContact", () => {
     const j = await get();
     expect(j.stage).toBe("said_yes");
     expect(j.contactAttempts).toBe(0);
+  });
+});
+
+describe("snooze", () => {
+  const MONDAY = new Date("2026-10-12T14:00:00Z"); // 9:00 Chicago
+
+  it("Tuesday's 'Monday' option is next Monday at 9am; 'in a week' is 7 days out", () => {
+    expect(snoozeTarget("monday", NOW, "America/Chicago")).toEqual(MONDAY);
+    expect(snoozeTarget("next_week", NOW, "America/Chicago").toISOString()).toBe("2026-10-13T14:00:00.000Z");
+  });
+
+  it("snoozing sets the wake-up day as the follow-up and logs it", async () => {
+    await snooze(db, jobId, MONDAY, NOW);
+    const j = await get();
+    expect(j.snoozedUntil).toEqual(MONDAY);
+    expect(j.nextFollowUpAt).toEqual(MONDAY);
+    expect((await log()).map((a) => a.note)).toContain("Snoozed until Mon, Oct 12");
+  });
+
+  it("any contact or stage change ends the snooze", async () => {
+    await snooze(db, jobId, MONDAY, NOW);
+    await logContact(db, jobId, "texted", {}, NOW);
+    expect((await get()).snoozedUntil).toBeNull();
+    await snooze(db, jobId, MONDAY, NOW);
+    await moveStage(db, jobId, "waiting_on_quote", {}, NOW);
+    expect((await get()).snoozedUntil).toBeNull();
+  });
+
+  it("bringing it back now puts it on today's list", async () => {
+    await snooze(db, jobId, MONDAY, NOW);
+    await wake(db, jobId, NOW);
+    const j = await get();
+    expect(j.snoozedUntil).toBeNull();
+    expect(j.nextFollowUpAt).toEqual(NOW);
   });
 });
 

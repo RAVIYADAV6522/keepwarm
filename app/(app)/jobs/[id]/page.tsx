@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { wakeAction } from "@/app/actions";
 import { notFound } from "next/navigation";
 import { DateField, DetailHeaderActions, QuoteField, StageStepper, UrgencyPicker } from "@/components/JobControls";
 import type { ActivityType } from "@/lib/constants";
 import { config } from "@/lib/config";
 import { EQUIPMENT_LABEL, money, SOURCE_LABEL, STAGE_LABEL } from "@/lib/format";
 import { getJob } from "@/lib/queries";
-import { formatDateTime, timeAgo, toDateInput } from "@/lib/time";
+import { formatDate, formatDateTime, timeAgo, toDateInput } from "@/lib/time";
 import { toCardJob } from "@/lib/view";
 
 const DOT: Record<ActivityType, string> = {
@@ -52,6 +53,17 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
         <span className="text-sm text-ink2">{EQUIPMENT_LABEL[job.equipment]}</span>
         {job.lostReason && <span className="text-sm text-ink2">Lost: {job.lostReason}</span>}
       </div>
+
+      {job.snoozedUntil && job.snoozedUntil > now && (
+        <div className="flex items-center justify-between gap-3 rounded-[14px] bg-blue-s px-4 py-3 text-[15px] text-blue">
+          <span>Snoozed · back on Today {formatDate(job.snoozedUntil, tz)}</span>
+          <form action={wakeAction.bind(null, job.id)}>
+            <button type="submit" className="font-semibold underline underline-offset-2">
+              Bring back now
+            </button>
+          </form>
+        </div>
+      )}
 
       <DetailHeaderActions job={card} />
       <StageStepper job={card} />

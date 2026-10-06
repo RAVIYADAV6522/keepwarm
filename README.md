@@ -20,7 +20,8 @@ Job requests arrive by phone, text, email, website form and a paper notebook. Ke
 4. **Logging a call.** On Green Leaf Bistro, tap **···** → *Log contact* → *Left voicemail*. The card leaves today's list and comes back tomorrow morning.
 5. **Quick add.** Tap **+ New job**, paste `Tony from Tony's Diner, ice machine is leaking again. 312-555-0142` and press *Organize it*. The fields are filled in and Tony is recognised as a repeat customer.
 6. **Ready-to-send text.** Open FreshMart Grocery. The text under the Call and Text buttons is the follow-up on their $1,250 quote, already written.
-7. **Numbers.** Open jobs, money waiting on a yes, and where leads come from.
+7. **Snooze.** On Luigi's Pizzeria, tap **···** → *Remind me later* → *Monday*. It moves to the Snoozed list at the bottom of Today.
+8. **Numbers.** Open jobs, money waiting on a yes, and where leads come from.
 
 *Reset demo data* on the Simulate leads page restores the starting state.
 
@@ -32,6 +33,7 @@ For the reasoning behind the product (the problem, key decisions, assumptions, r
 
 - **Today.** One ranked list of who to call. Every card says why it is there ("No reply in 3 days", "Emergency · by call 40 min ago") and has one-tap **Call** and **Text** buttons that open the phone's own apps.
 - **Follow-up rules.** Any open job with no contact for 2 days comes back on its own. Quotes with no answer after 2 days are sorted by dollar amount. After 3 unanswered attempts the card suggests **Mark as lost?**, but nothing is ever closed automatically.
+- **Snooze.** "Call me next week" leads can be set aside until tomorrow, Monday, a week out or any date. They leave Today, sit in a Snoozed list, and come back at 9am on the day, or immediately if the customer gets in touch first.
 - **Simple stages.** New → Waiting on quote → Waiting on their yes → Said yes → Scheduled → Done (or Lost). One tap to move a job, with a full activity history.
 - **Ready-to-send texts.** The Text button opens the phone's Messages app with a message written for where the job stands: a reply to a new request, a nudge on an unanswered quote, a visit confirmation. It is sent from the owner's own number, and "Texted" is logged with one tap afterwards.
 - **Two-tap contact logging.** Talked to them, left a voicemail, texted, emailed, sent a quote, they said yes. After a call, the "How did it go?" sheet is already open.
@@ -54,6 +56,8 @@ For the reasoning behind the product (the problem, key decisions, assumptions, r
 | 5 | Said yes, needs scheduling | Stage is Said yes |
 | 6 | Quotes you owe | Stage is Waiting on quote |
 | 7 | Gone quiet | No contact for 2+ days, unless a future follow-up or visit is set |
+
+Snoozed jobs are left out of every group until their date, then return under Follow-ups due ("Reminder you set for today").
 
 Thresholds live in one place (`lib/config.ts`). "Today" is calculated in the business's timezone (`BUSINESS_TZ`), not the server's.
 
@@ -135,10 +139,11 @@ All optional; see [`.env.example`](.env.example).
 
 | File | Covers |
 |---|---|
-| `lib/today.test.ts` | Every Today group, ordering, one group per job, follow-up and visit suppression, "Mark as lost?", thresholds, timezone end-of-day |
-| `lib/jobs.test.ts` | Contact logging and stage changes against a real (in-memory) Postgres |
+| `lib/today.test.ts` | Every Today group, ordering, one group per job, follow-up and visit suppression, snoozing, "Mark as lost?", thresholds, timezone end-of-day |
+| `lib/jobs.test.ts` | Contact logging, stage changes and snoozing against a real (in-memory) Postgres |
 | `lib/intake.test.ts` | New leads, repeat-customer messages, emergencies, spam, missed calls |
 | `lib/extract.test.ts` | Extraction from a messy SMS, a forwarded form email, a notebook note and spam (also against Claude when a key is set) |
+| `lib/messages.test.ts` | Ready-to-send texts for each stage |
 | `lib/phone.test.ts`, `lib/numbers.test.ts` | Phone normalization and reporting |
 
 ### Project layout

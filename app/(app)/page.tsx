@@ -1,14 +1,15 @@
 import Link from "next/link";
+import { wakeAction } from "@/app/actions";
 import { TodayCard } from "@/components/TodayCard";
 import { config, OWNER_NAME } from "@/lib/config";
 import { plural, TONE_DOT, TONE_TEXT } from "@/lib/format";
 import { getToday } from "@/lib/queries";
-import { hourIn } from "@/lib/time";
+import { formatDate, hourIn } from "@/lib/time";
 import { toCardJob } from "@/lib/view";
 
 export default async function TodayPage() {
   const now = new Date();
-  const { groups, calls, quotes } = await getToday(now);
+  const { groups, snoozed, calls, quotes } = await getToday(now);
   const tz = config.BUSINESS_TZ;
   const hour = hourIn(now, tz);
   const greeting = `Good ${hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"}, ${OWNER_NAME}`;
@@ -61,6 +62,35 @@ export default async function TodayPage() {
           </div>
         </section>
       ))}
+
+      {snoozed.length > 0 && (
+        <details className="card group overflow-hidden">
+          <summary className="flex h-[52px] cursor-pointer list-none items-center justify-between px-4 text-[15px] font-medium">
+            <span>
+              Snoozed <span className="text-ink2">{snoozed.length}</span>
+            </span>
+            <span className="text-[13px] text-ink2">
+              <span className="group-open:hidden">Show ▾</span>
+              <span className="hidden group-open:inline">Hide ▴</span>
+            </span>
+          </summary>
+          <ul className="divide-y divide-line border-t border-line">
+            {snoozed.map((j) => (
+              <li key={j.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                <Link href={`/jobs/${j.id}`} className="min-w-0">
+                  <div className="truncate text-[15px] font-medium">{toCardJob(j).name}</div>
+                  <div className="text-[13px] text-ink2">Back on {formatDate(j.snoozedUntil!, tz)}</div>
+                </Link>
+                <form action={wakeAction.bind(null, j.id)}>
+                  <button type="submit" className="btn-secondary h-10 px-3.5 text-sm">
+                    Bring back now
+                  </button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </div>
   );
 }

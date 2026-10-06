@@ -8,6 +8,7 @@ import { smsHref } from "@/lib/messages";
 import type { CardJob } from "@/lib/view";
 import { LogSheet } from "./LogSheet";
 import { MoveSheet } from "./MoveSheet";
+import { SnoozeSheet } from "./SnoozeSheet";
 import { toast } from "./toast";
 
 type Props = { job: CardJob; reason: string; tone: Tone; suggestLost: boolean; attempts: number };
@@ -15,7 +16,7 @@ type Props = { job: CardJob; reason: string; tone: Tone; suggestLost: boolean; a
 export function TodayCard({ job, reason, tone, suggestLost, attempts }: Props) {
   const router = useRouter();
   const [menu, setMenu] = useState(false);
-  const [sheet, setSheet] = useState<null | "log" | "call" | "text" | "move">(null);
+  const [sheet, setSheet] = useState<null | "log" | "call" | "text" | "move" | "snooze">(null);
   const [pending, start] = useTransition();
   const stop = (e: React.MouseEvent) => e.stopPropagation();
 
@@ -94,6 +95,9 @@ export function TodayCard({ job, reason, tone, suggestLost, attempts }: Props) {
             <button type="button" onClick={() => { setMenu(false); setSheet("move"); }} className="flex h-11 items-center justify-between rounded-[10px] px-3 text-left text-[15px] font-medium hover:bg-muted">
               Move stage <span className="text-ink2">›</span>
             </button>
+            <button type="button" onClick={() => { setMenu(false); setSheet("snooze"); }} className="flex h-11 items-center justify-between rounded-[10px] px-3 text-left text-[15px] font-medium hover:bg-muted">
+              Remind me later <span className="text-ink2">›</span>
+            </button>
           </div>
         )}
       </div>
@@ -107,6 +111,7 @@ export function TodayCard({ job, reason, tone, suggestLost, attempts }: Props) {
         />
       )}
       {sheet === "move" && <MoveSheet job={job} onClose={() => setSheet(null)} />}
+      {sheet === "snooze" && <SnoozeSheet job={job} onClose={() => setSheet(null)} />}
     </>
   );
 }

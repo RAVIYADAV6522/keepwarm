@@ -6,16 +6,16 @@ import { headers } from "next/headers";
 import { z } from "zod";
 import { getDb } from "@/db";
 import { jobs } from "@/db/schema";
-import { EQUIPMENT, LOG_KINDS, SOURCES, STAGES, URGENCY, type LogKind, type Stage, type Urgency } from "@/lib/constants";
+import { EQUIPMENT, LOG_KINDS, SNOOZE_OPTIONS, SOURCES, STAGES, URGENCY, type LogKind, type SnoozeOption, type Stage, type Urgency } from "@/lib/constants";
 import { config } from "@/lib/config";
 import { attachMessage, createJob } from "@/lib/intake";
-import { addNote, logContact, moveStage, updateJob } from "@/lib/jobs";
+import { addNote, logContact, moveStage, snooze, snoozeTarget, updateJob, wake } from "@/lib/jobs";
 import { DEMO_SAMPLES, type DemoKind } from "@/lib/demo-samples";
 import { matchCustomer } from "@/lib/match";
 import { sendEmergencyAlert } from "@/lib/notify";
 import { seed } from "@/lib/seed";
 import { dollarsToCents } from "@/lib/format";
-import { fromDateInput } from "@/lib/time";
+import { formatDate, fromDateInput } from "@/lib/time";
 
 // Thin server-action wrappers: validate input, call lib/jobs, refresh every screen.
 
@@ -43,6 +43,22 @@ export async function setQuoteAction(jobId: number, dollars: string) {
 
 export async function setFollowUpAction(jobId: number, date: string) {
   await updateJob(await getDb(), jobId, { nextFollowUpAt: fromDateInput(date, config.BUSINESS_TZ) });
+  refresh();
+}
+
+// Returns the wake-up day for the toast, e.g. "Mon, Oct 12".
+export async function snoozeAction(jobId: number, choice: SnoozeOption | { date: string }) {
+  const tz = config.BUSINESS_TZ;
+  const now = new Date();
+  const until = typeof choice === "string" ? (SNOOZE_OPTIONS.includes(choice) ? snoozeTarget(choice, now) : null) : fromDateInput(choice.date, tz);
+  if (!until || until <= now) throw new Error("Pick a day in the future");
+  await snooze(await getDb(), jobId, until, now);
+  refresh();
+  return formatDate(until, tz);
+}
+
+export async function wakeAction(jobId: number) {
+  await wake(await getDb(), jobId);
   refresh();
 }
 

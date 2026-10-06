@@ -100,7 +100,7 @@ export async function createJob(
 export async function attachMessage(db: Db, job: Job, raw: string, source: Source, now = new Date()) {
   await db
     .update(jobs)
-    .set({ lastInboundAt: now, nextFollowUpAt: now, contactAttempts: 0, updatedAt: now })
+    .set({ lastInboundAt: now, nextFollowUpAt: now, snoozedUntil: null, contactAttempts: 0, updatedAt: now })
     .where(eq(jobs.id, job.id));
   await db.insert(activities).values({
     jobId: job.id,

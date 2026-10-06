@@ -5,7 +5,7 @@ import { getDb } from "@/db";
 import { activities, customers, jobs, type Customer, type Job } from "@/db/schema";
 import { config } from "./config";
 import { buildDigest } from "./digest";
-import { countCalls, getTodayList } from "./today";
+import { countCalls, getTodayList, isSnoozed } from "./today";
 
 export type JobWithCustomer = Job & { customer: Customer };
 
@@ -31,8 +31,10 @@ export async function getOpenJobs(): Promise<JobWithCustomer[]> {
 }
 
 export async function getToday(now = new Date()) {
-  const groups = getTodayList(await getOpenJobs(), now, config);
-  return { groups, ...countCalls(groups) };
+  const open = await getOpenJobs();
+  const groups = getTodayList(open, now, config);
+  const snoozed = open.filter((j) => isSnoozed(j, now)).sort((a, b) => a.snoozedUntil!.getTime() - b.snoozedUntil!.getTime());
+  return { groups, snoozed, ...countCalls(groups) };
 }
 
 export async function getAllJobs(): Promise<JobWithCustomer[]> {

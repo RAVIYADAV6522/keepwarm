@@ -19,6 +19,7 @@ function job(overrides: Partial<TodayJobFields> = {}): J {
     source: "call",
     contactAttempts: 1,
     nextFollowUpAt: null,
+    snoozedUntil: null,
     quoteSentAt: null,
     quoteAmount: null,
     lastContactAt: ago(HOUR),
@@ -162,6 +163,15 @@ describe("getTodayList rules", () => {
     const tomorrowMorning = job({ nextFollowUpAt: new Date("2026-10-06T10:00:00Z") }); // 05:00 Chicago Oct 6
     const groups = getTodayList([tonight, tomorrowMorning], lateNight, cfg);
     expect(groups[0].items.map((i) => i.job.id)).toEqual([tonight.id]);
+  });
+
+  it("a snoozed job is off every group until its day, then comes back as a reminder", () => {
+    const monday = new Date("2026-10-12T14:00:00Z"); // 9:00 Chicago
+    const j = job({ urgency: "emergency", contactAttempts: 0, lastContactAt: null, snoozedUntil: monday, nextFollowUpAt: monday });
+    expect(keysOf([j])).toEqual([]);
+    const wakeUp = getTodayList([{ ...j, urgency: "routine", stage: "said_yes" }], monday, cfg)[0];
+    expect(wakeUp.key).toBe("follow_up");
+    expect(wakeUp.items[0].reason).toBe("Reminder you set for today");
   });
 
   it("counts calls separately from quotes to write", () => {

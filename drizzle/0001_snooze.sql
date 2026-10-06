@@ -1,0 +1,1 @@
+ALTER TABLE "jobs" ADD COLUMN "snoozed_until" timestamp with time zone;

@@ -113,6 +113,18 @@ export function tomorrowMorning(now: Date, tz: string): Date {
   return zonedTime(p.y, p.m, p.d, 9, 0, tz);
 }
 
+// `days` calendar days from today, at 9:00 in the zone.
+export function morningIn(days: number, now: Date, tz: string): Date {
+  const p = parts(new Date(startOfDay(now, tz).getTime() + (days * 24 + 12) * 3_600_000), tz);
+  return zonedTime(p.y, p.m, p.d, 9, 0, tz);
+}
+
+// Next Monday at 9:00 (a week out if today is Monday).
+export function nextMondayMorning(now: Date, tz: string): Date {
+  const day = new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "short" }).format(now);
+  return morningIn(7 - ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(day), now, tz);
+}
+
 // Monday 00:00 of the week containing `date`, in the zone.
 export function startOfWeek(date: Date, tz: string): Date {
   const day = new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "short" }).format(date);
