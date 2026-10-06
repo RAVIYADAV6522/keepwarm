@@ -263,3 +263,77 @@ body {
     animation: none !important;
   }
 }
+
+/* --- Sign-in page --------------------------------------------------------------------------- */
+.login-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+}
+.login-gold {
+  background: linear-gradient(100deg, #f1d9a4 0%, #c9a35b 45%, #f1d9a4 90%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: login-sheen 6s ease-in-out infinite;
+}
+.login-panel {
+  background: linear-gradient(140deg, rgba(220, 187, 122, 0.55), rgba(255, 255, 255, 0.06) 35%, rgba(255, 255, 255, 0.04) 65%, rgba(201, 163, 91, 0.4));
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+.login-input:focus-within {
+  border-color: rgba(201, 163, 91, 0.7);
+  box-shadow: 0 0 0 4px rgba(201, 163, 91, 0.12);
+}
+.login-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+}
+.login-button:hover::after {
+  transform: translateX(120%);
+}
+.login-preview {
+  perspective: 1200px;
+}
+.login-card {
+  transform: rotateX(8deg) rotateY(-14deg) rotateZ(2deg);
+  animation: login-float 7s ease-in-out infinite;
+}
+.ember {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 9999px;
+  background: #e6c785;
+  box-shadow: 0 0 8px 2px rgba(230, 199, 133, 0.6);
+  opacity: 0;
+  animation: ember-rise linear infinite;
+}
+@keyframes ember-rise {
+  0% { transform: translate(0, 0); opacity: 0; }
+  10% { opacity: 0.8; }
+  70% { opacity: 0.5; }
+  100% { transform: translate(24px, -105vh); opacity: 0; }
+}
+@keyframes login-sheen {
+  0%, 100% { background-position: 0% 0; }
+  50% { background-position: 100% 0; }
+}
+@keyframes login-float {
+  0%, 100% { transform: rotateX(8deg) rotateY(-14deg) rotateZ(2deg) translateY(0); }
+  50% { transform: rotateX(8deg) rotateY(-14deg) rotateZ(2deg) translateY(-10px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ember, .login-gold, .login-card {
+    animation: none !important;
+  }
+  .ember {
+    display: none;
+  }
+}
