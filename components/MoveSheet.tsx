@@ -8,8 +8,8 @@ import type { SheetJob } from "./LogSheet";
 import { Sheet } from "./Sheet";
 import { toast } from "./toast";
 
-export function MoveSheet({ job, onClose }: { job: SheetJob; onClose: () => void }) {
-  const [picked, setPicked] = useState<Stage | null>(null);
+export function MoveSheet({ job, initial = null, onClose }: { job: SheetJob; initial?: "lost" | "scheduled" | null; onClose: () => void }) {
+  const [picked, setPicked] = useState<Stage | null>(initial);
   const [lostReason, setLostReason] = useState("");
   const [visitDate, setVisitDate] = useState("");
   const [pending, start] = useTransition();
