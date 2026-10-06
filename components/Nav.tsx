@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { logout } from "@/app/login/actions";
 
 const isActive = (path: string, href: string) => (href === "/" ? path === "/" : path === href || (href === "/jobs" && /^\/jobs\/\d+/.test(path)));
 
-export function Sidebar({ todayCount, openCount }: { todayCount: number; openCount: number }) {
+export function Sidebar({ todayCount, openCount, canLogout }: { todayCount: number; openCount: number; canLogout: boolean }) {
   const path = usePathname();
   const items = [
     { href: "/", label: "Today", count: todayCount },
@@ -39,9 +40,31 @@ export function Sidebar({ todayCount, openCount }: { todayCount: number; openCou
         <div className="mt-auto flex flex-col gap-1 px-3 text-[13px] text-ink2">
           <Link href="/digest" className="hover:text-ink">Morning email preview</Link>
           <Link href="/demo" className="hover:text-ink">Demo: simulate leads</Link>
+          {canLogout && <LogoutButton />}
         </div>
       </div>
     </aside>
+  );
+}
+
+export function LogoutButton() {
+  return (
+    <form action={logout}>
+      <button type="submit" className="hover:text-ink">
+        Log out
+      </button>
+    </form>
+  );
+}
+
+// Phones have no sidebar, so the extra links live at the bottom of each page.
+export function MobileFooter({ canLogout }: { canLogout: boolean }) {
+  return (
+    <div className="mt-12 flex flex-wrap justify-center gap-x-5 gap-y-2 text-[13px] text-ink2 lg:hidden">
+      <Link href="/digest" className="hover:text-ink">Morning email preview</Link>
+      <Link href="/demo" className="hover:text-ink">Demo: simulate leads</Link>
+      {canLogout && <LogoutButton />}
+    </div>
   );
 }
 

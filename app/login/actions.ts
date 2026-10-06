@@ -19,3 +19,8 @@ export async function login(_: { error: string } | null, form: FormData) {
   }
   redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/");
 }
+
+export async function logout() {
+  (await cookies()).delete(AUTH_COOKIE);
+  redirect("/login");
+}

@@ -181,7 +181,8 @@ All optional. See [`.env.example`](.env.example).
 | `DATABASE_URL` | Use Neon Postgres instead of PGlite |
 | `ANTHROPIC_API_KEY` / `ANTHROPIC_MODEL` | Claude extraction (default `claude-haiku-4-5`) instead of rules |
 | `RESEND_API_KEY`, `ALERT_EMAIL_TO`, `ALERT_EMAIL_FROM`, `APP_URL` | Really send emergency alerts and the morning email |
-| `APP_PASSCODE` | Require a shared passcode (httpOnly cookie, 90 days) |
+| `APP_PASSCODE` | Require a shared passcode (httpOnly cookie, 90 days). Log out from the sidebar or page footer |
+| `SHOW_PASSCODE` | `true` prefills and shows the passcode on the login page (public demo only) |
 | `INBOUND_TOKEN` | Require `?token=` on the email, SMS and call webhooks |
 | `CRON_SECRET` | Protect `/api/cron/digest` (Vercel Cron sends it automatically) |
 | `BUSINESS_TZ`, `OWNER_NAME`, `BUSINESS_NAME` | Localize to the customer |
