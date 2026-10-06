@@ -110,7 +110,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
                 {i < activities.length - 1 && <span className="w-0.5 flex-1 bg-line" />}
               </div>
               <div className="flex flex-col gap-0.5 pb-4">
-                <span className="text-base font-medium">{a.note || a.type}</span>
+                <span className="text-base font-medium wrap-anywhere">{a.note || a.type}</span>
                 <span className="text-[13.5px] text-ink2" title={formatDateTime(a.createdAt, tz)}>
                   {timeAgo(a.createdAt, now, tz)} · {formatDateTime(a.createdAt, tz)}
                 </span>
@@ -129,7 +129,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
               <span className="hidden group-open:inline">Hide ▴</span>
             </span>
           </summary>
-          <div className="px-4 pb-4 font-serif text-base leading-relaxed whitespace-pre-wrap text-ink2 italic">{job.rawInput}</div>
+          <div className="px-4 pb-4 font-serif text-base leading-relaxed whitespace-pre-wrap wrap-anywhere text-ink2 italic">{job.rawInput}</div>
         </details>
       )}
 

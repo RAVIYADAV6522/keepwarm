@@ -164,7 +164,7 @@ export function AddJob({ fromInbox }: { fromInbox?: FromInbox }) {
 
       {step === "loading" && (
         <div className="flex flex-col gap-4">
-          <div className="card p-[18px] text-[17px] leading-normal whitespace-pre-wrap">{raw}</div>
+          <div className="card p-[18px] text-[17px] leading-normal whitespace-pre-wrap wrap-anywhere">{raw}</div>
           <div className="card flex flex-col gap-3.5 p-[18px]">
             <div className="flex items-center gap-2.5 text-[15px] font-medium text-ink2">
               <span className="flex gap-1">

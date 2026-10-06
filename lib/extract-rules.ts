@@ -27,7 +27,7 @@ const EMERGENCY_RE =
 const SOON_RE = /\b(warm\w*|nois\w*|loud|grinding|leak\w*|ic(?:ing|ed) up|frost\w*|this week|soon|not making ice|running (?:warm|hot)|tripping|buzzing)\b/i;
 const SPAM_RE =
   /\b(unsubscribe|newsletter|invoice #?\d*|payment (?:received|due)|receipt|seo|rank (?:higher|on google)|google reviews? package|webinar|limited time|\d+% off|special offer|marketing services|backlinks?|crypto|wire transfer)\b/i;
-const REPAIR_RE = /\b(cooler|freezer|walk[\s-]?in|reach[\s-]?in|ice (?:machine|maker)|compressor|gasket|refrigerat\w*|condenser|evaporator|thermostat|not cooling|repair|service visit|maintenance)\b/i;
+export const REPAIR_RE = /\b(cooler|freezer|walk[\s-]?in|reach[\s-]?in|ice (?:machine|maker)|compressor|gasket|refrigerat\w*|condenser|evaporator|thermostat|not cooling|repair|service visit|maintenance)\b/i;
 
 type Label = "name" | "business" | "company" | "phone" | "email" | "address" | "message" | "details";
 

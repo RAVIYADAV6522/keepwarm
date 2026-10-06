@@ -2,6 +2,7 @@ import { and, desc, eq, gte, inArray, ne } from "drizzle-orm";
 import type { Db } from "@/db";
 import { gmailAccounts, inboxItems, type InboxItem } from "@/db/schema";
 import { extract, type ExtractResult } from "./extract";
+import { REPAIR_RE } from "./extract-rules";
 import { findCustomer, findOpenJob, intake } from "./intake";
 import { accessToken, decryptToken, getMessage, listMessageIds, type MailMessage } from "./gmail";
 import { normalizePhone } from "./phone";
@@ -11,6 +12,8 @@ import { normalizePhone } from "./phone";
 //   - an emergency ("freezer down")           -> straight onto Today + alert, no waiting for review
 //   - looks like a job enquiry                -> "pending" in the Inbox, fields filled in, she reviews
 //   - anything else (newsletters, receipts)   -> skipped; only the Gmail id is kept, never the content
+
+const AUTOMATED_RE = /(?:^|[.+_-])(?:no-?reply|donotreply|do-not-reply|notifications?|mailer-daemon|alerts?|updates?|news(?:letter)?)(?:[.+_-]|@)/i;
 
 export type ProcessOutcome = "pending" | "auto" | "ignored" | "duplicate";
 
@@ -25,6 +28,9 @@ export async function processEmail(db: Db, m: MailMessage, now = new Date()): Pr
 
   const raw = emailText(m);
   const extracted = await extract(raw, "email");
+  // Notifications from no-reply addresses (Search Console, banks, apps) aren't enquiries unless they're
+  // clearly about refrigeration work — website contact forms often come from no-reply senders too.
+  if (AUTOMATED_RE.test(m.fromEmail ?? "") && !REPAIR_RE.test(`${m.subject}\n${m.text}`)) extracted.is_job_request = false;
   const email = extracted.email ?? m.fromEmail;
   const customer = await findCustomer(db, normalizePhone(extracted.phone), email);
   const openJob = customer ? await findOpenJob(db, customer.id) : null;

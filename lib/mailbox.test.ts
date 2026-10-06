@@ -50,6 +50,13 @@ describe("processEmail", () => {
     expect(item).toMatchObject({ status: "ignored", subject: null, body: null, fromEmail: null });
   });
 
+  it("automated notices are skipped, but a website form sent from a no-reply address is kept", async () => {
+    const notice = mail({ fromEmail: "sc-noreply@google.com", subject: "Your site's performance", text: "Check your top pages on Google Search. See which queries trigger your site: https://c.gle/AAuDWvn4BebAHFa6QmH" });
+    expect(await processEmail(db, notice, NOW)).toBe("ignored");
+    const form = mail({ fromEmail: "noreply@deniserefrigeration.com", subject: "New contact form submission", text: "Name: Ana Ruiz\nPhone: (312) 555-0288\nMessage: Our reach-in cooler is leaking water, can you take a look?" });
+    expect(await processEmail(db, form, NOW)).toBe("pending");
+  });
+
   it("the same email is never processed twice", async () => {
     const m = mail({ fromEmail: "x@y.com", subject: "Cooler", text: "Reach-in cooler is noisy, can you quote a repair? 708-555-0101" });
     expect(await processEmail(db, m, NOW)).toBe("pending");

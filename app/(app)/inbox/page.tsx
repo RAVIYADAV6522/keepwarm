@@ -97,7 +97,7 @@ export default async function InboxPage({ searchParams }: PageProps<"/inbox">) {
           const x = item.extracted as ExtractResult;
           const who = [x.business_name, x.customer_name].filter(Boolean).join(" · ") || item.fromName || item.fromEmail;
           return (
-            <div key={item.id} className="card flex flex-col gap-2.5 p-4">
+            <div key={item.id} className="card flex min-w-0 flex-col gap-2.5 p-4 wrap-anywhere">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="truncate text-[17px] font-semibold">{who}</div>
@@ -114,7 +114,7 @@ export default async function InboxPage({ searchParams }: PageProps<"/inbox">) {
               </div>
               <details className="text-sm">
                 <summary className="cursor-pointer text-ink2">Show the email</summary>
-                <div className="mt-2 rounded-xl bg-muted p-3 font-serif text-[15px] leading-relaxed whitespace-pre-wrap text-ink2">{item.body}</div>
+                <div className="mt-2 max-h-[420px] overflow-y-auto rounded-xl bg-muted p-3 font-serif text-[15px] leading-relaxed whitespace-pre-wrap wrap-anywhere text-ink2">{item.body}</div>
               </details>
               <div className="flex gap-2">
                 <Link href={`/jobs/new?inbox=${item.id}`} className="btn-primary h-11 flex-1 text-[15px]">
