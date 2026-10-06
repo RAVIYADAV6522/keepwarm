@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { moveStageAction } from "@/app/actions";
 import { SOURCE_LABEL, TONE_CHIP, type Tone } from "@/lib/format";
+import { smsHref } from "@/lib/messages";
 import type { CardJob } from "@/lib/view";
 import { LogSheet } from "./LogSheet";
 import { MoveSheet } from "./MoveSheet";
@@ -14,7 +15,7 @@ type Props = { job: CardJob; reason: string; tone: Tone; suggestLost: boolean; a
 export function TodayCard({ job, reason, tone, suggestLost, attempts }: Props) {
   const router = useRouter();
   const [menu, setMenu] = useState(false);
-  const [sheet, setSheet] = useState<null | "log" | "call" | "move">(null);
+  const [sheet, setSheet] = useState<null | "log" | "call" | "text" | "move">(null);
   const [pending, start] = useTransition();
   const stop = (e: React.MouseEvent) => e.stopPropagation();
 
@@ -61,7 +62,8 @@ export function TodayCard({ job, reason, tone, suggestLost, attempts }: Props) {
               <a href={`tel:${job.phone}`} onClick={() => setTimeout(() => setSheet("call"), 400)} className="btn-primary h-12 flex-1 text-base">
                 Call
               </a>
-              <a href={`sms:${job.phone}`} onClick={() => setTimeout(() => setSheet("log"), 400)} className="btn-secondary h-12 flex-1 text-base">
+              {/* Opens her Messages app with a ready-to-send text; "Texted" is pre-selected when she comes back. */}
+              <a href={smsHref(job.phone, job.textBody)} onClick={() => setTimeout(() => setSheet("text"), 400)} className="btn-secondary h-12 flex-1 text-base">
                 Text
               </a>
             </>
@@ -96,8 +98,13 @@ export function TodayCard({ job, reason, tone, suggestLost, attempts }: Props) {
         )}
       </div>
 
-      {(sheet === "log" || sheet === "call") && (
-        <LogSheet job={job} title={sheet === "call" ? "How did the call go?" : "Log contact"} onClose={() => setSheet(null)} />
+      {(sheet === "log" || sheet === "call" || sheet === "text") && (
+        <LogSheet
+          job={job}
+          title={sheet === "call" ? "How did the call go?" : sheet === "text" ? "Did you send the text?" : "Log contact"}
+          initialKind={sheet === "text" ? "texted" : undefined}
+          onClose={() => setSheet(null)}
+        />
       )}
       {sheet === "move" && <MoveSheet job={job} onClose={() => setSheet(null)} />}
     </>

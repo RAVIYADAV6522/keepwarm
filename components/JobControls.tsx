@@ -4,20 +4,26 @@ import { useState, useTransition } from "react";
 import { moveStageAction, setFollowUpAction, setQuoteAction, setUrgencyAction, setVisitAction } from "@/app/actions";
 import { URGENCY, type Stage, type Urgency } from "@/lib/constants";
 import { STAGE_LABEL, URGENCY_LABEL } from "@/lib/format";
+import { smsHref } from "@/lib/messages";
 import type { CardJob } from "@/lib/view";
 import { LogSheet } from "./LogSheet";
 import { MoveSheet } from "./MoveSheet";
 import { toast } from "./toast";
 
-type Sheet = null | "log" | "call" | "move" | "lost" | "scheduled";
+type Sheet = null | "log" | "call" | "text" | "move" | "lost" | "scheduled";
 
 // Call / Text / Log contact / Move stage for the job detail page.
 export function useJobSheets(job: CardJob) {
   const [sheet, setSheet] = useState<Sheet>(null);
   const close = () => setSheet(null);
   const node =
-    sheet === "log" || sheet === "call" ? (
-      <LogSheet job={job} title={sheet === "call" ? "How did the call go?" : "Log contact"} onClose={close} />
+    sheet === "log" || sheet === "call" || sheet === "text" ? (
+      <LogSheet
+        job={job}
+        title={sheet === "call" ? "How did the call go?" : sheet === "text" ? "Did you send the text?" : "Log contact"}
+        initialKind={sheet === "text" ? "texted" : undefined}
+        onClose={close}
+      />
     ) : sheet ? (
       <MoveSheet job={job} initial={sheet === "lost" || sheet === "scheduled" ? sheet : null} onClose={close} />
     ) : null;
@@ -34,7 +40,7 @@ export function DetailHeaderActions({ job }: { job: CardJob }) {
             <a href={`tel:${job.phone}`} onClick={() => setTimeout(() => open("call"), 400)} className="btn-primary h-[52px] flex-1 text-[17px]">
               Call {job.contact.split(" ")[0] || ""}
             </a>
-            <a href={`sms:${job.phone}`} onClick={() => setTimeout(() => open("log"), 400)} className="btn-secondary h-[52px] flex-1 text-[17px]">
+            <a href={smsHref(job.phone, job.textBody)} onClick={() => setTimeout(() => open("text"), 400)} className="btn-secondary h-[52px] flex-1 text-[17px]">
               Text
             </a>
           </>
@@ -44,6 +50,7 @@ export function DetailHeaderActions({ job }: { job: CardJob }) {
           </a>
         ) : null}
       </div>
+      {job.phone && <SuggestedText text={job.textBody} />}
       <div className="flex gap-2">
         <button type="button" onClick={() => open("log")} className="btn-secondary h-11 flex-1 text-[15px]">
           + Log contact
@@ -54,6 +61,29 @@ export function DetailHeaderActions({ job }: { job: CardJob }) {
       </div>
       {node}
     </>
+  );
+}
+
+// The text the Text button will open with, so she can see it (or copy it on a computer) first.
+function SuggestedText({ text }: { text: string }) {
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("Text copied");
+    } catch {
+      toast("Couldn't copy — select the text instead");
+    }
+  };
+  return (
+    <div className="flex flex-col gap-2 rounded-[14px] bg-muted px-4 py-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="field-label">Ready-to-send text</span>
+        <button type="button" onClick={copy} className="text-sm font-semibold text-clay-ink underline underline-offset-2">
+          Copy
+        </button>
+      </div>
+      <p className="text-[15px] leading-snug text-pretty">{text}</p>
+    </div>
   );
 }
 

@@ -19,7 +19,8 @@ Job requests arrive by phone, text, email, website form and a paper notebook. Ke
 3. **New leads and spam.** Press *Simulate email* twice. The hotel's request becomes a new job; the SEO pitch is filtered out.
 4. **Logging a call.** On Green Leaf Bistro, tap **···** → *Log contact* → *Left voicemail*. The card leaves today's list and comes back tomorrow morning.
 5. **Quick add.** Tap **+ New job**, paste `Tony from Tony's Diner, ice machine is leaking again. 312-555-0142` and press *Organize it*. The fields are filled in and Tony is recognised as a repeat customer.
-6. **Numbers.** Open jobs, money waiting on a yes, and where leads come from.
+6. **Ready-to-send text.** Open FreshMart Grocery. The text under the Call and Text buttons is the follow-up on their $1,250 quote, already written.
+7. **Numbers.** Open jobs, money waiting on a yes, and where leads come from.
 
 *Reset demo data* on the Simulate leads page restores the starting state.
 
@@ -32,6 +33,7 @@ For the reasoning behind the product (the problem, key decisions, assumptions, r
 - **Today.** One ranked list of who to call. Every card says why it is there ("No reply in 3 days", "Emergency · by call 40 min ago") and has one-tap **Call** and **Text** buttons that open the phone's own apps.
 - **Follow-up rules.** Any open job with no contact for 2 days comes back on its own. Quotes with no answer after 2 days are sorted by dollar amount. After 3 unanswered attempts the card suggests **Mark as lost?**, but nothing is ever closed automatically.
 - **Simple stages.** New → Waiting on quote → Waiting on their yes → Said yes → Scheduled → Done (or Lost). One tap to move a job, with a full activity history.
+- **Ready-to-send texts.** The Text button opens the phone's Messages app with a message written for where the job stands: a reply to a new request, a nudge on an unanswered quote, a visit confirmation. It is sent from the owner's own number, and "Texted" is logged with one tap afterwards.
 - **Two-tap contact logging.** Talked to them, left a voicemail, texted, emailed, sent a quote, they said yes. After a call, the "How did it go?" sheet is already open.
 - **One intake pipeline.** Website form, email, SMS and missed-call webhooks all go through the same `intake()` function. Spam and invoices are filtered out, and a message from a customer who already has an open job is added to that job instead of creating a duplicate.
 - **Quick add.** Paste a text or email, or dictate with the keyboard mic. The message is turned into structured fields, shown for review, and saved. Repeat customers are recognised by phone number.

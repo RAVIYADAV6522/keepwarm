@@ -8,8 +8,10 @@ import { toast } from "./toast";
 
 export type SheetJob = { id: number; name: string; contact: string; phoneDisplay: string; stage: string; quoteDollars: string };
 
-export function LogSheet({ job, title = "Log contact", onClose }: { job: SheetJob; title?: string; onClose: () => void }) {
-  const [kind, setKind] = useState<LogKind | null>(null);
+type Props = { job: SheetJob; title?: string; initialKind?: LogKind; onClose: () => void };
+
+export function LogSheet({ job, title = "Log contact", initialKind, onClose }: Props) {
+  const [kind, setKind] = useState<LogKind | null>(initialKind ?? null);
   const [note, setNote] = useState("");
   const [quote, setQuote] = useState(job.quoteDollars);
   const [pending, start] = useTransition();
