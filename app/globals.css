@@ -190,27 +190,76 @@ body {
   scrollbar-width: none;
 }
 
-/* Loading placeholders: a soft shimmer, switched off for people who prefer less motion. */
-.skeleton {
-  border-radius: 8px;
-  background: linear-gradient(90deg, var(--muted) 25%, color-mix(in srgb, var(--muted) 55%, var(--surface)) 50%, var(--muted) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s ease-in-out infinite;
-}
-@keyframes shimmer {
-  from {
-    background-position: 100% 0;
-  }
-  to {
-    background-position: -100% 0;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
-  .skeleton {
-    animation: none;
-  }
   .card-hover,
   .card-hover:hover {
     transform: none;
+  }
+}
+
+/* Ember the mascot: a gentle bounce, a flicker and a blink while loading; drifting z's when sleepy. */
+.mascot .mascot-body {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: ember-bounce 1.4s ease-in-out infinite;
+}
+.mascot .mascot-shadow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ember-shadow 1.4s ease-in-out infinite;
+}
+.mascot .mascot-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ember-blink 3.6s infinite;
+}
+.mascot-sleepy .mascot-body {
+  animation: ember-breathe 3s ease-in-out infinite;
+}
+.mascot-sleepy .mascot-shadow {
+  animation: none;
+}
+.mascot-z {
+  animation: ember-z 2.6s ease-in-out infinite;
+}
+@keyframes ember-bounce {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  45% { transform: translateY(-9%) scale(0.97, 1.04); }
+  90% { transform: translateY(0) scale(1.04, 0.96); }
+}
+@keyframes ember-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 0.18; }
+  45% { transform: scaleX(0.75); opacity: 0.1; }
+}
+@keyframes ember-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+@keyframes ember-breathe {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.02, 0.97); }
+}
+@keyframes ember-z {
+  0% { opacity: 0; transform: translate(0, 2px); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translate(3px, -4px); }
+}
+.loading-dot {
+  animation: loading-dot 1s ease-in-out infinite;
+}
+@keyframes loading-dot {
+  0%, 100% { opacity: 0.25; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-3px); }
+}
+.fade-in {
+  animation: fade-in 0.35s ease-out;
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mascot *, .loading-dot, .fade-in {
+    animation: none !important;
   }
 }

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Newsreader } from "next/font/google";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import { Toaster } from "@/components/toast";
 import "./globals.css";
 
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="font-sans">
         {children}
         <Toaster />
+        <OfflineBanner />
       </body>
     </html>
   );
