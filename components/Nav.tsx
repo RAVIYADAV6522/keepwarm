@@ -39,7 +39,7 @@ export function Sidebar({ todayCount, openCount, account }: { todayCount: number
               {on && <span className="absolute top-2.5 bottom-2.5 left-0 w-[3px] rounded-full bg-accent" />}
               {n.label}
               {n.count != null && (
-                <span className={`min-w-6 rounded-full px-2 py-0.5 text-center text-[12px] font-semibold tabular-nums ${on ? "bg-accent text-white" : "bg-side-2 text-side-ink2"}`}>
+                <span className={`min-w-6 rounded-full px-2 py-0.5 text-center text-[12px] font-semibold tabular-nums ${on ? "bg-accent text-on-accent" : "bg-side-2 text-side-ink2"}`}>
                   {n.count}
                 </span>
               )}
@@ -81,7 +81,7 @@ const TOOLS = [
 function AccountRow({ account }: { account: Account }) {
   return (
     <div className="mt-3 flex items-center gap-2.5 border-t border-side-line px-1.5 pt-4">
-      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-gradient-to-b from-[var(--accent-top)] to-accent font-serif text-[17px] text-white shadow-[0_4px_12px_var(--accent-glow)]">
+      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-gradient-to-b from-[var(--accent-top)] to-accent font-serif text-[17px] text-on-accent shadow-[0_4px_12px_var(--accent-glow)]">
         {account.owner.charAt(0)}
       </span>
       <div className="min-w-0 flex-1 leading-tight">
@@ -160,18 +160,18 @@ function BoltIcon() {
   );
 }
 
-// Ember tile with a flame: the KeepWarm mark (same as app/icon.svg).
+// Brass tile with a flame: the KeepWarm mark (same as app/icon.svg).
 export function LogoMark({ size = 30 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" className="flex-none drop-shadow-[0_4px_10px_var(--accent-glow)]">
       <defs>
-        <linearGradient id="kw-ember" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#FF7A45" />
-          <stop offset="1" stopColor="#E8501F" />
+        <linearGradient id="kw-brass" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#DCBB7A" />
+          <stop offset="1" stopColor="#B08A45" />
         </linearGradient>
       </defs>
-      <rect width="64" height="64" rx="16" fill="url(#kw-ember)" />
-      <path d="M32 14c-6 9-12 14-12 23a12 12 0 0 0 24 0c0-5-2-8-5-12-1 4-3 6-5 7 1-6 0-12-2-18Z" fill="#fff" />
+      <rect width="64" height="64" rx="16" fill="url(#kw-brass)" />
+      <path d="M32 14c-6 9-12 14-12 23a12 12 0 0 0 24 0c0-5-2-8-5-12-1 4-3 6-5 7 1-6 0-12-2-18Z" fill="#141A2B" />
     </svg>
   );
 }
@@ -216,7 +216,7 @@ export function BottomBar() {
         <Link
           href="/jobs/new"
           aria-label="New job"
-          className="-mt-[22px] flex h-[60px] w-[60px] items-center justify-center rounded-full bg-gradient-to-b from-[var(--accent-top)] to-accent text-[32px] leading-none font-light text-white shadow-[0_8px_20px_var(--accent-glow),0_0_0_5px_var(--bg)]"
+          className="-mt-[22px] flex h-[60px] w-[60px] items-center justify-center rounded-full bg-gradient-to-b from-[var(--accent-top)] to-accent text-[32px] leading-none font-light text-on-accent shadow-[0_8px_20px_var(--accent-glow),0_0_0_5px_var(--bg)]"
         >
           +
         </Link>

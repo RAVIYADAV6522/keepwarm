@@ -8,7 +8,7 @@ import type { TodayGroup } from "./today";
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
-const TONE_HEX: Record<string, string> = { red: "#D42A35", amber: "#B45309", green: "#0F7B5F", blue: "#3B5BDB", clay: "#C2410C", neutral: "#5D6476" };
+const TONE_HEX: Record<string, string> = { red: "#B8424C", amber: "#6B55B8", green: "#2F7D5C", blue: "#3A5EA8", clay: "#7D5F24", neutral: "#5D6476" };
 
 export function buildDigest(
   today: { groups: TodayGroup<JobWithCustomer>[]; calls: number; quotes: number },
@@ -46,7 +46,7 @@ export function buildDigest(
           return `<tr><td style="padding:12px 14px;background:#FFFFFF;border:1px solid #E3E6EC;border-radius:12px;font:15px/1.4 -apple-system,Segoe UI,sans-serif;color:#0E1220">
             <div style="font-weight:600">${link ? `<a href="${esc(link)}" style="color:#0E1220;text-decoration:none">${esc(displayName(job.customer))}</a>` : esc(displayName(job.customer))}${job.quoteAmount ? ` <span style="float:right">${money(job.quoteAmount)}</span>` : ""}</div>
             <div style="color:#5D6476;font-size:14px">${esc(job.problem)}</div>
-            <div style="margin-top:6px;font-size:13px;color:${TONE_HEX[g.tone]}">${esc(reason)}${phone ? ` · <a href="tel:${phone}" style="color:#F0602F;font-weight:600">Call ${esc(formatPhone(phone))}</a>` : ""}</div>
+            <div style="margin-top:6px;font-size:13px;color:${TONE_HEX[g.tone]}">${esc(reason)}${phone ? ` · <a href="tel:${phone}" style="color:#7D5F24;font-weight:600">Call ${esc(formatPhone(phone))}</a>` : ""}</div>
           </td></tr><tr><td style="height:8px"></td></tr>`;
         })
         .join("")}`,
@@ -58,10 +58,10 @@ export function buildDigest(
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px">
     <tr><td style="font:14px -apple-system,Segoe UI,sans-serif;color:#5D6476">${esc(date)} · ${esc(BUSINESS_NAME)}</td></tr>
     <tr><td style="padding-top:6px;font:32px/1.15 Georgia,serif;color:#0E1220">Good morning, ${esc(OWNER_NAME)}</td></tr>
-    <tr><td style="padding-top:12px"><span style="display:inline-block;background:#FFECE3;color:#C2410C;font:600 15px -apple-system,Segoe UI,sans-serif;padding:8px 14px;border-radius:999px">${esc(headline)}</span></td></tr>
+    <tr><td style="padding-top:12px"><span style="display:inline-block;background:#F6EEDD;color:#7D5F24;font:600 15px -apple-system,Segoe UI,sans-serif;padding:8px 14px;border-radius:999px">${esc(headline)}</span></td></tr>
     ${rows}
     <tr><td style="padding-top:20px;font:14px -apple-system,Segoe UI,sans-serif;color:#5D6476">Open jobs: <b style="color:#0E1220">${stats.open}</b> · Waiting on a yes: <b style="color:#0E1220">${money(stats.waitingCents) || "$0"}</b></td></tr>
-    ${appUrl ? `<tr><td style="padding-top:18px"><a href="${esc(appUrl)}" style="display:inline-block;background:#F0602F;color:#fff;font:600 15px -apple-system,Segoe UI,sans-serif;padding:12px 18px;border-radius:12px;text-decoration:none">Open KeepWarm</a></td></tr>` : ""}
+    ${appUrl ? `<tr><td style="padding-top:18px"><a href="${esc(appUrl)}" style="display:inline-block;background:#B08A45;color:#141A2B;font:600 15px -apple-system,Segoe UI,sans-serif;padding:12px 18px;border-radius:12px;text-decoration:none">Open KeepWarm</a></td></tr>` : ""}
   </table></td></tr></table></body></html>`;
 
   return { subject, text, html };

@@ -1,29 +1,31 @@
 @import "tailwindcss";
 
-/* Design tokens: "Midnight & Ember". A midnight sidebar, crisp neutral pages, and one warm ember accent.
-   Colour is only used for meaning: red = emergency, amber = waiting on them, green = won/done,
-   blue = scheduled, clay (ember tint) = new. */
+/* Design tokens: "Midnight & Brass". A midnight sidebar, crisp neutral pages, and one champagne-gold accent.
+   Colour is only used for meaning: red = emergency, amber token (soft violet) = waiting on them,
+   green = won/done, blue = scheduled, clay (brass tint) = new. */
 :root {
   --bg: #f4f5f8;
   --surface: #ffffff;
   --line: #e3e6ec;
   --ink: #0e1220;
   --ink2: #5d6476;
-  --accent: #f0602f;
-  --accent-h: #dc4e1d;
-  --accent-top: #ff7a45;
-  --accent-glow: rgb(240 96 47 / 0.32);
-  --clay: #ffece3;
-  --clay-ink: #c2410c;
-  --muted: #eef0f4;
-  --red: #d42a35;
-  --red-s: #fde8e9;
-  --amber: #b45309;
-  --amber-s: #fef3dc;
-  --green: #0f7b5f;
-  --green-s: #ddf5ec;
-  --blue: #3b5bdb;
-  --blue-s: #e6ebff;
+  --accent: #b08a45;
+  --accent-h: #9c7837;
+  --accent-top: #c9a35b;
+  --on-accent: #141a2b;
+  --accent-glow: rgb(176 138 69 / 0.24);
+  --clay: #f6eedd;
+  --clay-ink: #7d5f24;
+  --muted: #eceef3;
+  --red: #b8424c;
+  --red-s: #f9e6e8;
+  /* "Waiting on them" is a soft violet so it never competes with the brass accent. */
+  --amber: #6b55b8;
+  --amber-s: #eeeafb;
+  --green: #2f7d5c;
+  --green-s: #e1f1e9;
+  --blue: #3a5ea8;
+  --blue-s: #e5ecf8;
   /* Midnight sidebar, the same in light and dark. */
   --side: #0e1220;
   --side-2: #161b2c;
@@ -48,21 +50,22 @@
     --line: #222a3c;
     --ink: #eceff6;
     --ink2: #8e97ab;
-    --accent: #ff6a35;
-    --accent-h: #ff8150;
-    --accent-top: #ff8a57;
-    --accent-glow: rgb(255 106 53 / 0.28);
-    --clay: #2b1a12;
-    --clay-ink: #ff9e73;
-    --muted: #1a2031;
-    --red: #ff6b6f;
-    --red-s: #351a1e;
-    --amber: #f5b547;
-    --amber-s: #33280f;
-    --green: #3fd09a;
-    --green-s: #0f2a22;
-    --blue: #8aa4ff;
-    --blue-s: #182346;
+    --accent: #c9a35b;
+    --accent-h: #d6b571;
+    --accent-top: #dcbb7a;
+    --on-accent: #141a2b;
+    --accent-glow: rgb(201 163 91 / 0.2);
+    --clay: #2a2416;
+    --clay-ink: #dcc08a;
+    --muted: #1b2131;
+    --red: #e8838a;
+    --red-s: #2f1a1f;
+    --amber: #b8a3ec;
+    --amber-s: #221d36;
+    --green: #7cc7a3;
+    --green-s: #13261f;
+    --blue: #8fb0e8;
+    --blue-s: #16223a;
     --side: #070a12;
     --side-2: #111626;
     --side-line: #1c2334;
@@ -87,6 +90,7 @@
   --color-ink2: var(--ink2);
   --color-accent: var(--accent);
   --color-accent-h: var(--accent-h);
+  --color-on-accent: var(--on-accent);
   --color-clay: var(--clay);
   --color-clay-ink: var(--clay-ink);
   --color-muted: var(--muted);
@@ -137,15 +141,15 @@ body {
   gap: 8px;
   border-radius: 12px;
   background: linear-gradient(180deg, var(--accent-top), var(--accent));
-  color: #fff;
+  color: var(--on-accent);
   font-weight: 600;
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), 0 6px 16px var(--accent-glow);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.28), 0 6px 16px var(--accent-glow);
   transition: filter 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 .btn-primary:hover {
   filter: brightness(1.05);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), 0 10px 22px var(--accent-glow);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.28), 0 10px 22px var(--accent-glow);
 }
 .btn-primary:active {
   transform: translateY(1px);

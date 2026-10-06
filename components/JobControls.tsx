@@ -129,7 +129,7 @@ export function StageStepper({ job }: { job: CardJob }) {
           return (
             <button key={s} type="button" onClick={() => go(s)} className="relative flex min-h-11 flex-col items-center gap-2 text-center">
               <span
-                className={`flex h-7 w-7 items-center justify-center rounded-full border-2 text-[13px] font-bold text-white shadow-[0_0_0_4px_var(--surface)] ${
+                className={`flex h-7 w-7 items-center justify-center rounded-full border-2 text-[13px] font-bold text-on-accent shadow-[0_0_0_4px_var(--surface)] ${
                   done ? "border-accent bg-accent" : current ? "border-accent bg-surface" : "border-line bg-surface"
                 }`}
               >
