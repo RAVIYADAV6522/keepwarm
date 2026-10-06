@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { getDb } from "@/db";
 import { activities, customers, jobs, type Customer, type Job } from "@/db/schema";
 import { config } from "./config";
+import { buildDigest } from "./digest";
 import { countCalls, getTodayList } from "./today";
 
 export type JobWithCustomer = Job & { customer: Customer };
@@ -92,4 +93,10 @@ export async function getJobsByStage(stages: Job["stage"][]) {
     .select({ stage: jobs.stage, quoteAmount: jobs.quoteAmount, closedAt: jobs.closedAt, createdAt: jobs.createdAt, source: jobs.source })
     .from(jobs)
     .where(inArray(jobs.stage, stages));
+}
+
+export async function getDigest(now = new Date()) {
+  const [today, open] = await Promise.all([getToday(now), getOpenJobs()]);
+  const waitingCents = open.filter((j) => j.stage === "waiting_on_yes").reduce((n, j) => n + (j.quoteAmount ?? 0), 0);
+  return buildDigest(today, { open: open.length, waitingCents }, now);
 }
