@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { AUTH_COOKIE, passcodeToken } from "@/lib/auth";
+import { AUTH_COOKIE, isValidCookie } from "@/lib/auth";
 
 // Passcode gate. Off when APP_PASSCODE is unset (local dev).
 // Public: the contact form, read-only share links (they check their own token), the inbound webhooks
@@ -10,7 +10,7 @@ export async function proxy(req: NextRequest) {
   const passcode = process.env.APP_PASSCODE;
   if (!passcode || PUBLIC.some((re) => re.test(req.nextUrl.pathname))) return NextResponse.next();
 
-  if (req.cookies.get(AUTH_COOKIE)?.value === (await passcodeToken(passcode))) return NextResponse.next();
+  if (await isValidCookie(req.cookies.get(AUTH_COOKIE)?.value)) return NextResponse.next();
 
   if (req.nextUrl.pathname.startsWith("/api/")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const login = new URL("/login", req.url);
@@ -19,5 +19,6 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|svg|ico|webmanifest)$).*)"],
+  // Skip only Next's own build assets and the app icon. (Skipping "any path ending in .png" let /jobs/1.png past the gate.)
+  matcher: ["/((?!_next/static|_next/image|icon\\.svg$).*)"],
 };

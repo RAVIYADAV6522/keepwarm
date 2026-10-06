@@ -38,7 +38,13 @@ describe("getTodayList groups", () => {
   it("1. emergencies: emergency urgency in new or waiting_on_quote", () => {
     const g = groupOf(job({ urgency: "emergency", contactAttempts: 0, lastContactAt: null, createdAt: ago(40 * 60_000) }));
     expect(g).toEqual({ key: "emergency", reason: "Emergency · by call 40 min ago" });
-    expect(groupOf(job({ urgency: "emergency", stage: "waiting_on_quote" }))?.key).toBe("emergency");
+    expect(groupOf(job({ urgency: "emergency", stage: "waiting_on_quote", lastContactAt: null }))?.key).toBe("emergency");
+  });
+
+  it("an emergency leaves the top once she's reached them, and comes back if they write again", () => {
+    const reached = job({ urgency: "emergency", stage: "waiting_on_quote", lastContactAt: ago(HOUR) });
+    expect(groupOf(reached)?.key).toBe("quotes_owed");
+    expect(groupOf({ ...reached, lastInboundAt: ago(10 * 60_000) })?.key).toBe("emergency");
   });
 
   it("an emergency that is already quoted is no longer an emergency", () => {
@@ -63,6 +69,19 @@ describe("getTodayList groups", () => {
   it("4. waiting on their yes for 2+ days", () => {
     const g = groupOf(job({ stage: "waiting_on_yes", quoteSentAt: ago(3 * DAY), lastContactAt: ago(3 * DAY) }));
     expect(g).toEqual({ key: "waiting_yes", reason: "No reply in 3 days" });
+  });
+
+  it("4. a nudge on the quote, or a follow-up booked for later, takes it off today's list", () => {
+    const stale = { stage: "waiting_on_yes" as const, quoteSentAt: ago(3 * DAY) };
+    expect(groupOf(job({ ...stale, lastContactAt: ago(HOUR) }))).toBeUndefined();
+    expect(groupOf(job({ ...stale, lastContactAt: ago(3 * DAY), nextFollowUpAt: new Date(NOW.getTime() + 2 * DAY) }))).toBeUndefined();
+  });
+
+  it("4. days are calendar days: Monday 4pm counts as 2 days on Wednesday morning", () => {
+    const monday4pm = new Date("2026-10-05T21:00:00Z"); // Mon 16:00 Chicago
+    const wed7am = new Date("2026-10-07T12:00:00Z"); // Wed 07:00 Chicago
+    const g = getTodayList([job({ stage: "waiting_on_yes", quoteSentAt: monday4pm, lastContactAt: monday4pm })], wed7am, cfg)[0];
+    expect(g?.key).toBe("waiting_yes");
   });
 
   it("4. a quote sent yesterday is not nagged yet", () => {
@@ -112,14 +131,14 @@ describe("getTodayList rules", () => {
       job({ stage: "waiting_on_yes", quoteSentAt: ago(2 * DAY), lastContactAt: ago(2 * DAY) }),
       job({ nextFollowUpAt: ago(HOUR) }),
       job({ contactAttempts: 0, lastContactAt: null }),
-      job({ urgency: "emergency" }),
+      job({ urgency: "emergency", lastContactAt: null }),
     ];
     expect(keysOf(jobs)).toEqual(["emergency", "new", "follow_up", "waiting_yes", "said_yes", "quotes_owed", "gone_quiet"]);
   });
 
   it("waiting-on-yes is sorted by quote amount, biggest first", () => {
-    const small = job({ stage: "waiting_on_yes", quoteSentAt: ago(5 * DAY), quoteAmount: 125_000, lastContactAt: ago(DAY) });
-    const big = job({ stage: "waiting_on_yes", quoteSentAt: ago(2 * DAY), quoteAmount: 340_000, lastContactAt: ago(DAY) });
+    const small = job({ stage: "waiting_on_yes", quoteSentAt: ago(5 * DAY), quoteAmount: 125_000, lastContactAt: ago(3 * DAY) });
+    const big = job({ stage: "waiting_on_yes", quoteSentAt: ago(2 * DAY), quoteAmount: 340_000, lastContactAt: ago(2 * DAY) });
     const [g] = getTodayList([small, big], NOW, cfg);
     expect(g.items.map((i) => i.job.id)).toEqual([big.id, small.id]);
   });

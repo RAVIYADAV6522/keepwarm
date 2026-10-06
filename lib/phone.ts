@@ -3,7 +3,8 @@
 
 export function normalizePhone(raw: string | null | undefined, defaultCountryCode = "1"): string | null {
   if (!raw) return null;
-  const trimmed = raw.trim();
+  // "(312) 555-0142 x12" / "ext 3": the extension isn't part of the number.
+  const trimmed = raw.trim().replace(/\s*(?:x|ext\.?|extension)\s*\d{1,6}$/i, "");
   const digits = trimmed.replace(/\D/g, "");
   if (trimmed.startsWith("+")) {
     return digits.length >= 8 && digits.length <= 15 ? `+${digits}` : null;

@@ -60,6 +60,18 @@ describe("intake", () => {
     if (r.outcome === "created") expect(r.job.urgency).toBe("emergency");
   });
 
+  it("an urgent-sounding reply about their quote attaches instead of creating a new emergency", async () => {
+    const before = (await db.select().from(jobs)).length;
+    const r = await intake(db, "Text from +13125550190:\nSounds good, go ahead asap", "text", { overrides: { phone: "+13125550190" } }, NOW);
+    expect(r.outcome).toBe("attached");
+    expect((await db.select().from(jobs)).length).toBe(before);
+  });
+
+  it("a reply that looks like an invoice from a customer with an open job is kept, not ignored", async () => {
+    const r = await intake(db, "From: rita@harborseafood.co\nSubject: Re: quote\n\nPlease see the attached receipt. Payment due on approval.", "email", {}, NOW);
+    expect(r.outcome).toBe("attached");
+  });
+
   it("spam email is logged but never becomes a job", async () => {
     const before = (await db.select().from(jobs)).length;
     const r = await intake(db, "From: hello@rankfast.io\nSubject: SEO\n\nRank on Google page 1, 50% off. Unsubscribe here.", "email", {}, NOW);

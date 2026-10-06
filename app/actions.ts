@@ -2,7 +2,6 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { z } from "zod";
 import { getDb } from "@/db";
 import { jobs } from "@/db/schema";
@@ -17,6 +16,14 @@ import { seed } from "@/lib/seed";
 import { createShare, revokeShare } from "@/lib/share";
 import { setCustomerNote } from "@/lib/customers";
 import { dollarsToCents } from "@/lib/format";
+import { normalizePhone } from "@/lib/phone";
+import { requireAuth } from "@/lib/session";
+import { POST as callWebhook } from "./api/inbound/call/route";
+import { POST as emailWebhook } from "./api/inbound/email/route";
+import { POST as smsWebhook } from "./api/inbound/sms/route";
+import { POST as webformWebhook } from "./api/inbound/webform/route";
+
+const INBOUND = { webform: webformWebhook, email: emailWebhook, sms: smsWebhook, call: callWebhook };
 import { formatDate, fromDateInput } from "@/lib/time";
 
 // Thin server-action wrappers: validate input, call lib/jobs, refresh every screen.
@@ -26,12 +33,14 @@ function refresh() {
 }
 
 export async function logContactAction(jobId: number, kind: LogKind, note: string, quote?: string) {
+  await requireAuth();
   if (!LOG_KINDS.includes(kind)) throw new Error("Unknown contact type");
   await logContact(await getDb(), jobId, kind, { note, quoteCents: dollarsToCents(quote) });
   refresh();
 }
 
 export async function moveStageAction(jobId: number, stage: Stage, opts: { lostReason?: string; visitDate?: string } = {}) {
+  await requireAuth();
   if (!STAGES.includes(stage)) throw new Error("Unknown stage");
   const scheduledFor = opts.visitDate ? fromDateInput(opts.visitDate, config.BUSINESS_TZ) : undefined;
   await moveStage(await getDb(), jobId, stage, { lostReason: opts.lostReason, scheduledFor });
@@ -39,17 +48,24 @@ export async function moveStageAction(jobId: number, stage: Stage, opts: { lostR
 }
 
 export async function setQuoteAction(jobId: number, dollars: string) {
-  await updateJob(await getDb(), jobId, { quoteAmount: dollarsToCents(dollars) });
+  await requireAuth();
+  // Empty clears the quote; anything else must be a real amount (never wipe a quote because of a typo).
+  const cents = dollarsToCents(dollars);
+  if (dollars.trim() && cents == null) return { error: "Enter an amount like 1250", cents: null };
+  await updateJob(await getDb(), jobId, { quoteAmount: cents });
   refresh();
+  return { error: null, cents };
 }
 
 export async function setFollowUpAction(jobId: number, date: string) {
+  await requireAuth();
   await updateJob(await getDb(), jobId, { nextFollowUpAt: fromDateInput(date, config.BUSINESS_TZ) });
   refresh();
 }
 
 // Returns the wake-up day for the toast, e.g. "Mon, Oct 12".
 export async function snoozeAction(jobId: number, choice: SnoozeOption | { date: string }) {
+  await requireAuth();
   const tz = config.BUSINESS_TZ;
   const now = new Date();
   const until = typeof choice === "string" ? (SNOOZE_OPTIONS.includes(choice) ? snoozeTarget(choice, now) : null) : fromDateInput(choice.date, tz);
@@ -60,43 +76,51 @@ export async function snoozeAction(jobId: number, choice: SnoozeOption | { date:
 }
 
 export async function wakeAction(jobId: number) {
+  await requireAuth();
   await wake(await getDb(), jobId);
   refresh();
 }
 
 export async function setCustomerNoteAction(customerId: number, note: string) {
+  await requireAuth();
   await setCustomerNote(await getDb(), customerId, note.slice(0, 2000));
   refresh();
 }
 
 export async function createShareAction() {
+  await requireAuth();
   const token = await createShare(await getDb());
   revalidatePath("/numbers");
   return token;
 }
 
 export async function revokeShareAction() {
+  await requireAuth();
   await revokeShare(await getDb());
   revalidatePath("/numbers");
 }
 
 export async function setVisitAction(jobId: number, date: string) {
+  await requireAuth();
   await updateJob(await getDb(), jobId, { scheduledFor: fromDateInput(date, config.BUSINESS_TZ) });
   refresh();
 }
 
 export async function setUrgencyAction(jobId: number, urgency: Urgency) {
+  await requireAuth();
   if (!URGENCY.includes(urgency)) throw new Error("Unknown urgency");
   await updateJob(await getDb(), jobId, { urgency });
   refresh();
 }
 
 export async function addNoteAction(jobId: number, note: string) {
+  await requireAuth();
   await addNote(await getDb(), jobId, note);
   refresh();
 }
 
 export async function matchCustomerAction(phone: string, email: string) {
+  await requireAuth();
   return matchCustomer(await getDb(), phone || null, email || null);
 }
 
@@ -115,14 +139,21 @@ const JobInputSchema = z.object({
 // Save from the "+" screen. Either a new job, or (for a repeat customer with an open job)
 // a note on that job so the same request doesn't show up twice.
 export async function saveJobAction(input: z.input<typeof JobInputSchema>, raw: string, attachToJobId?: number) {
-  const data = JobInputSchema.parse(input);
+  await requireAuth();
+  // Problems come back as values: Next.js hides thrown error messages in production.
+  const parsed = JobInputSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check the fields and try again" };
+  const data = parsed.data;
   const db = await getDb();
   if (!data.businessName && !data.customerName && !data.phone && !data.email) {
-    throw new Error("Add at least a name or a phone number");
+    return { error: "Add at least a name or a phone number" };
+  }
+  if (data.phone && !normalizePhone(data.phone)) {
+    return { error: "That phone number doesn't look right. Use 10 digits, like (312) 555-0142." };
   }
   if (attachToJobId) {
     const [job] = await db.select().from(jobs).where(eq(jobs.id, attachToJobId));
-    if (!job) throw new Error("That job no longer exists");
+    if (!job) return { error: "That job no longer exists" };
     await attachMessage(db, job, raw || data.problem, data.source);
     refresh();
     return { jobId: job.id, attached: true };
@@ -133,24 +164,25 @@ export async function saveJobAction(input: z.input<typeof JobInputSchema>, raw: 
   return { jobId: job.id, attached: false };
 }
 
-// /demo: post a realistic payload to the real webhook route, exactly like Twilio or an email service would.
+// /demo: hand a realistic payload to the real webhook handler, exactly as Twilio or an email service would.
+// Called in-process (not over HTTP), so the inbound token never leaves the server.
 export async function simulateAction(kind: DemoKind, index: number) {
+  await requireAuth();
   const samples = DEMO_SAMPLES[kind];
   const payload = samples[index % samples.length];
-  const h = await headers();
-  const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
-  const path = { webform: "webform", email: "email", sms: "sms", call: "call" }[kind];
   const token = process.env.INBOUND_TOKEN ? `?token=${encodeURIComponent(process.env.INBOUND_TOKEN)}` : "";
-  const res = await fetch(`${origin}/api/inbound/${path}${token}`, {
+  const req = new Request(`http://keepwarm.local/api/inbound/${kind}${token}`, {
     method: "POST",
-    headers: { "content-type": "application/json", cookie: h.get("cookie") ?? "" },
+    headers: { "content-type": "application/json" },
     body: JSON.stringify(payload),
   });
+  const res = await INBOUND[kind](req);
   refresh();
   return { status: res.status, payload, result: await res.json() };
 }
 
 export async function resetDemoAction() {
+  await requireAuth();
   await seed(await getDb());
   refresh();
 }

@@ -5,10 +5,12 @@ import { toCsv } from "@/lib/csv";
 import { EQUIPMENT_LABEL, SOURCE_LABEL, STAGE_LABEL, URGENCY_LABEL } from "@/lib/format";
 import { formatPhone } from "@/lib/phone";
 import { getAllJobs } from "@/lib/queries";
+import { isSignedIn } from "@/lib/session";
 import { toDateInput } from "@/lib/time";
 
 // "My data is mine": every job or customer as a CSV. Behind the passcode like the rest of the app.
 export async function GET(_req: Request, { params }: RouteContext<"/api/export/[kind]">) {
+  if (!(await isSignedIn())) return new Response("Unauthorized", { status: 401 });
   const { kind } = await params;
   const tz = config.BUSINESS_TZ;
   const day = (d: Date | null) => toDateInput(d, tz);

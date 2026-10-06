@@ -34,7 +34,7 @@ export function toCardJob(job: Job & { customer: Customer }): CardJob {
     source: job.source,
     stage: job.stage,
     amount: money(job.quoteAmount),
-    quoteDollars: job.quoteAmount == null ? "" : String(Math.round(job.quoteAmount / 100)),
+    quoteDollars: job.quoteAmount == null ? "" : (job.quoteAmount / 100).toFixed(2).replace(/\.00$/, ""),
     textBody: suggestedText(
       {
         firstName: c.name?.trim().split(/\s+/)[0] || null,

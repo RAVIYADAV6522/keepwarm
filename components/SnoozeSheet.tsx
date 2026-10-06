@@ -7,6 +7,13 @@ import type { SheetJob } from "./LogSheet";
 import { Sheet } from "./Sheet";
 import { inBackground, toast } from "./toast";
 
+// The earliest date she can pick: tomorrow, in her browser's local calendar.
+function tomorrow() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 // "Call me next week": take the job off Today until the day she picks.
 export function SnoozeSheet({ job, onClose }: { job: SheetJob; onClose: () => void }) {
   const [date, setDate] = useState("");
@@ -33,12 +40,13 @@ export function SnoozeSheet({ job, onClose }: { job: SheetJob; onClose: () => vo
       <div className="flex gap-2.5">
         <input
           type="date"
+          min={tomorrow()}
           aria-label="Pick a date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           className="h-[52px] min-w-0 flex-1 rounded-[14px] border border-line bg-bg px-4 text-base outline-none focus:border-accent"
         />
-        <button type="button" disabled={!date} onClick={() => snooze({ date })} className="btn-primary h-[52px] px-5 text-base">
+        <button type="button" disabled={!date || date < tomorrow()} onClick={() => snooze({ date })} className="btn-primary h-[52px] px-5 text-base">
           Remind me
         </button>
       </div>

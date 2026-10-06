@@ -137,18 +137,20 @@ export async function intake(
   now = new Date(),
 ): Promise<IntakeResult> {
   const extracted = await extract(raw, source);
-
-  if (!extracted.is_job_request) {
-    await db.insert(inboundLog).values({ source, raw, outcome: "ignored: not a job request", createdAt: now });
-    return { outcome: "ignored", extracted };
-  }
-
   const input = { ...toInput(extracted, source), ...opts.overrides };
   const customer = await findCustomer(db, normalizePhone(input.phone), input.email);
   const openJob = customer ? await findOpenJob(db, customer.id) : null;
 
-  // Attach to their open job — unless this is a fresh emergency about something else.
-  const newEmergency = input.urgency === "emergency" && openJob?.urgency !== "emergency";
+  // A customer with an open job is never spam: "see the attached receipt — go ahead" is a reply.
+  if (!extracted.is_job_request && !openJob) {
+    await db.insert(inboundLog).values({ source, raw, outcome: "ignored: not a job request", createdAt: now });
+    return { outcome: "ignored", extracted };
+  }
+
+  // Attach to their open job — unless it's a fresh emergency about different equipment.
+  // ("Sounds good, go ahead asap" about their quote is a reply, not a new emergency.)
+  const newEmergency =
+    input.urgency === "emergency" && openJob?.urgency !== "emergency" && input.equipment !== "other" && input.equipment !== openJob?.equipment;
   if (openJob && !newEmergency) {
     await attachMessage(db, openJob, raw, source, now);
     await db.insert(inboundLog).values({ source, raw, outcome: "attached", jobId: openJob.id, createdAt: now });

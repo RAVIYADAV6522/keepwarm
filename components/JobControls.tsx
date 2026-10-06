@@ -8,7 +8,7 @@ import { smsHref } from "@/lib/messages";
 import type { CardJob } from "@/lib/view";
 import { LogSheet } from "./LogSheet";
 import { MoveSheet } from "./MoveSheet";
-import { toast } from "./toast";
+import { inBackground, toast } from "./toast";
 
 type Sheet = null | "log" | "call" | "text" | "move" | "lost" | "scheduled";
 
@@ -106,7 +106,7 @@ export function StageStepper({ job }: { job: CardJob }) {
       try {
         await moveStageAction(job.id, next);
       } catch {
-        toast("Couldn't save. Check your connection and try again.");
+        toast("Couldn't save. Check your connection and try again.", { error: true });
       }
     });
   };
@@ -150,7 +150,15 @@ export function QuoteField({ jobId, dollars }: { jobId: number; dollars: string 
   const [value, setValue] = useState(dollars);
   const save = () => {
     if (value === dollars) return;
-    setQuoteAction(jobId, value).then(() => toast(value ? `Quote set to $${Number(value.replace(/[$,]/g, "")).toLocaleString("en-US")}` : "Quote cleared"));
+    setQuoteAction(jobId, value).then(
+      (r) => {
+        if (r.error) {
+          setValue(dollars);
+          toast(r.error, { error: true });
+        } else toast(r.cents == null ? "Quote cleared" : `Quote set to $${(r.cents / 100).toLocaleString("en-US")}`);
+      },
+      () => toast("Couldn't save. Check your connection and try again.", { error: true }),
+    );
   };
   return (
     <span className="flex items-center gap-0.5 text-[17px] font-semibold">
@@ -177,7 +185,10 @@ export function DateField({ jobId, value, kind }: { jobId: number; value: string
         type="date"
         defaultValue={value}
         aria-label={kind === "visit" ? "Visit date" : "Next follow-up"}
-        onChange={(e) => action(jobId, e.target.value).then(() => toast(e.target.value ? "Date saved" : "Date cleared"))}
+        onChange={(e) => {
+          const v = e.target.value;
+          inBackground(action(jobId, v), () => toast(v ? "Date saved" : "Date cleared"));
+        }}
         className={`bg-transparent text-right text-base font-medium outline-none ${kind === "visit" ? "text-blue" : "text-clay-ink"}`}
       />
     </span>

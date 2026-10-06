@@ -106,6 +106,10 @@ export function AddJob() {
           raw,
           attachToJobId,
         );
+        if ("error" in result) {
+          setError(result.error ?? "Could not save");
+          return;
+        }
         const who = f.businessName || f.customerName || "Job";
         toast(result.attached ? `Added to ${who}'s open job` : `Saved · ${who} is on your Today list`);
         router.push(result.attached ? `/jobs/${result.jobId}` : "/");

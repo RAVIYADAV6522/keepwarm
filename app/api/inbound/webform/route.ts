@@ -1,4 +1,5 @@
-import { pick, readBody, runIntake, summary } from "@/lib/inbound";
+import { pick, readBody, runIntake, summary, tokenOk } from "@/lib/inbound";
+import { normalizePhone } from "@/lib/phone";
 
 // Door 1: the website contact form. Public, so it's protected by a honeypot instead of a token.
 export async function POST(req: Request) {
@@ -28,13 +29,16 @@ export async function POST(req: Request) {
       Object.entries({
         customerName: pick(body, "name"),
         businessName: pick(body, "business"),
-        phone,
+        phone: normalizePhone(phone) ? phone : "", // a garbled number shouldn't override one the extractor found
         email: pick(body, "email"),
         address: pick(body, "address"),
       }).filter(([, v]) => v),
     ),
   });
-  return done(req, isHtmlForm, summary(result));
+  // The public gets a plain "thanks". Only the in-app simulator (which carries the inbound token) sees
+  // the details, so the form can't be used to check who is a customer.
+  const internal = !!process.env.INBOUND_TOKEN && tokenOk(req);
+  return done(req, isHtmlForm, internal ? summary(result) : { ok: true });
 }
 
 function done(req: Request, isHtmlForm: boolean, json: object) {

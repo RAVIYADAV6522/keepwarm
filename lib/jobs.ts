@@ -66,6 +66,12 @@ export async function logContact(
       break;
   }
 
+  // Logging a quote or a yes on a done/lost job reopens it.
+  if (patch.stage && (job.stage === "done" || job.stage === "lost")) {
+    patch.closedAt = null;
+    patch.lostReason = null;
+  }
+
   await db.update(jobs).set(patch).where(eq(jobs.id, jobId));
 
   let summary = LOG_LABEL[kind];

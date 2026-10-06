@@ -35,13 +35,15 @@ export function DemoPanel() {
       setLast({ ...r, kind });
     });
 
-  const reset = () =>
+  const reset = () => {
+    if (!window.confirm("Reset to the demo data? Every job, customer and note you've added will be replaced.")) return;
     start(async () => {
       await resetDemoAction();
       setLast(null);
       setCounts({});
       toast("Demo data reset");
     });
+  };
 
   const x = last?.result?.extracted;
   return (

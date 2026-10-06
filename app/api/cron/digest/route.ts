@@ -4,7 +4,9 @@ import { getDigest } from "@/lib/queries";
 // Called once a day by Vercel Cron (see vercel.json). Vercel sends "Authorization: Bearer $CRON_SECRET".
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
+  // Without a secret the endpoint is only open in local development.
+  const allowed = secret ? req.headers.get("authorization") === `Bearer ${secret}` : process.env.NODE_ENV !== "production";
+  if (!allowed) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const digest = await getDigest();
