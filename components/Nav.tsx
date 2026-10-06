@@ -6,7 +6,9 @@ import { logout } from "@/app/login/actions";
 
 const isActive = (path: string, href: string) => (href === "/" ? path === "/" : path === href || (href === "/jobs" && /^\/jobs\/\d+/.test(path)));
 
-export function Sidebar({ todayCount, openCount, canLogout }: { todayCount: number; openCount: number; canLogout: boolean }) {
+type Account = { owner: string; business: string; canLogout: boolean };
+
+export function Sidebar({ todayCount, openCount, account }: { todayCount: number; openCount: number; account: Account }) {
   const path = usePathname();
   const items = [
     { href: "/", label: "Today", count: todayCount },
@@ -37,34 +39,122 @@ export function Sidebar({ todayCount, openCount, canLogout }: { todayCount: numb
         <Link href="/jobs/new" className="btn-primary mt-[18px] h-12 text-[15px]">
           <span className="text-[22px] leading-none font-light">+</span> New job
         </Link>
-        <div className="mt-auto flex flex-col gap-1 px-3 text-[13px] text-ink2">
-          <Link href="/digest" className="hover:text-ink">Morning email preview</Link>
-          <Link href="/demo" className="hover:text-ink">Demo: simulate leads</Link>
-          {canLogout && <LogoutButton />}
+        <div className="mt-auto flex flex-col gap-1">
+          <div className="px-3.5 pb-1 text-[11.5px] font-semibold tracking-[0.06em] text-ink2 uppercase">Tools</div>
+          {TOOLS.map((t) => {
+            const on = path === t.href;
+            return (
+              <Link
+                key={t.href}
+                href={t.href}
+                className={`flex h-10 items-center gap-2.5 rounded-xl px-3.5 text-[14px] ${on ? "bg-clay font-semibold text-clay-ink" : "text-ink2 hover:bg-muted hover:text-ink"}`}
+              >
+                <t.Icon />
+                {t.label}
+              </Link>
+            );
+          })}
+          <AccountRow account={account} />
         </div>
       </div>
     </aside>
   );
 }
 
-export function LogoutButton() {
+const TOOLS = [
+  { href: "/digest", label: "Morning email", Icon: MailIcon },
+  { href: "/demo", label: "Simulate leads", Icon: BoltIcon },
+];
+
+function AccountRow({ account }: { account: Account }) {
   return (
-    <form action={logout}>
-      <button type="submit" className="hover:text-ink">
-        Log out
-      </button>
-    </form>
+    <div className="mt-3 flex items-center gap-2.5 border-t border-line px-1.5 pt-4">
+      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-clay font-serif text-[17px] text-clay-ink">
+        {account.owner.charAt(0)}
+      </span>
+      <div className="min-w-0 flex-1 leading-tight">
+        <div className="truncate text-[14px] font-semibold">{account.owner}</div>
+        <div className="truncate text-[12px] text-ink2">{account.business}</div>
+      </div>
+      {account.canLogout && (
+        <form action={logout}>
+          <button
+            type="submit"
+            title="Log out"
+            aria-label="Log out"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-ink2 hover:bg-muted hover:text-ink"
+          >
+            <LogoutIcon />
+          </button>
+        </form>
+      )}
+    </div>
   );
 }
 
-// Phones have no sidebar, so the extra links live at the bottom of each page.
-export function MobileFooter({ canLogout }: { canLogout: boolean }) {
+// Phones have no sidebar, so the tools and log out live in a small list at the bottom of each page.
+export function MobileFooter({ account }: { account: Account }) {
+  const row = "flex h-[52px] w-full items-center gap-3 px-4 text-[15px] text-ink";
   return (
-    <div className="mt-12 flex flex-wrap justify-center gap-x-5 gap-y-2 text-[13px] text-ink2 lg:hidden">
-      <Link href="/digest" className="hover:text-ink">Morning email preview</Link>
-      <Link href="/demo" className="hover:text-ink">Demo: simulate leads</Link>
-      {canLogout && <LogoutButton />}
+    <div className="mt-12 flex flex-col gap-2.5 lg:hidden">
+      <div className="px-1 text-[11.5px] font-semibold tracking-[0.06em] text-ink2 uppercase">Tools</div>
+      <div className="card divide-y divide-line overflow-hidden">
+        {TOOLS.map((t) => (
+          <Link key={t.href} href={t.href} className={row}>
+            <span className="text-ink2"><t.Icon /></span>
+            <span className="flex-1">{t.label}</span>
+            <span className="text-ink2">›</span>
+          </Link>
+        ))}
+        {account.canLogout && (
+          <form action={logout}>
+            <button type="submit" className={row}>
+              <span className="text-ink2"><LogoutIcon /></span>
+              <span className="flex-1 text-left">Log out</span>
+            </button>
+          </form>
+        )}
+      </div>
     </div>
+  );
+}
+
+const iconProps = {
+  width: 18,
+  height: 18,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.8,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": true,
+} as const;
+
+function MailIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <path d="m4 7 8 6 8-6" />
+    </svg>
+  );
+}
+
+function BoltIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M13 3 5 13.5h6L10 21l8-10.5h-6L13 3Z" />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />
+      <path d="M10 8 6 12l4 4" />
+      <path d="M6 12h10" />
+    </svg>
   );
 }
 
