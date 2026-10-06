@@ -20,7 +20,8 @@ async function connect(): Promise<Db> {
   const { PGlite } = await import("@electric-sql/pglite");
   const { drizzle } = await import("drizzle-orm/pglite");
   const { migrate } = await import("drizzle-orm/pglite/migrator");
-  const dir = process.env.PGLITE_DIR ?? path.join(process.cwd(), ".pglite");
+  // On Vercel without a DATABASE_URL, fall back to /tmp: a throwaway demo database, re-seeded on cold start.
+  const dir = process.env.PGLITE_DIR ?? (process.env.VERCEL ? "/tmp/keepwarm-pglite" : path.join(process.cwd(), ".pglite"));
   const db = drizzle(new PGlite(dir), { schema });
   await migrate(db, { migrationsFolder: MIGRATIONS });
 
